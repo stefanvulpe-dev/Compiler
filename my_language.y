@@ -7,8 +7,8 @@ extern char* yytext;
 
 void* result;
 char msg[ARR_SIZE], var_type[ARR_SIZE], var_name[ARR_SIZE], scope[ARR_SIZE], arr_type[ARR_SIZE], init_list[ARR_SIZE], element[ARR_SIZE];
-int inum;
-float fnum; 
+int inum, opi1, opi2;
+float fnum, opf1, opf2; 
 bool boolean;
 char character;
 char* string;
@@ -33,11 +33,10 @@ char* string;
 %token <boolean_value>BOOLEAN
 %token <str_value>TIP
 %token BGIN END ASSIGN CLASS AND OR LTE GTE NEQ EQ
-%type <int_value>aexp_int
-%type <float_value>aexp_float
 %type <boolean_value>bexp
 %type <str_value>str
 %type <address>exp
+%type <address>aexp
 %type <str_value>initialization_list
 %type <str_value>initialization_list_int
 %type <str_value>initialization_list_float
@@ -56,6 +55,7 @@ global_variables : global_declaration ';' global_variables
                  | functions
 
 global_declaration : CONST TIP ID ASSIGN exp {
+                        types_arr_size = 0;
                         var_name[0] = '\0';
                         strcpy(scope, "global");
                         strcat(var_name, $3); 
@@ -65,6 +65,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                         insertVar(var_name, var_type, $5);
                    }
                    | TIP ID ASSIGN exp {
+                        types_arr_size = 0;
                         var_name[0] = '\0';
                         strcpy(scope, "global");
                         strcat(var_name, $2); 
@@ -248,20 +249,21 @@ param : ID '(' ')'
       | exp
       ;
 
-exp : aexp_int {
-        printf("S-a recunoscut valoarea numerica %d.\n", $1);
-        inum = $1; 
-        result = (void*)(malloc(sizeof(int))); 
-        memcpy(result, &inum, sizeof(int)); 
+exp : aexp {
+        if (strcmp(types_arr[0], "int") == 0) {
+            printf("S-a recunoscut valoarea numerica %d.\n", *((int*)$1));
+            inum = *((int*)$1); 
+            result = malloc(sizeof(int)); 
+            memcpy(result, &inum, sizeof(int)); 
+        }
+        else {
+            printf("S-a recunoscut valoarea numerica %f.\n", *((float*)$1));
+            fnum = *((float*)$1); 
+            result = malloc(sizeof(float)); 
+            memcpy(result, &fnum, sizeof(float)); 
+        }
         $$ = result;
     }
-    | aexp_float {
-        printf("S-a recunoscut numarul real %f.\n", $1);
-        fnum = $1; 
-        result = (void*)(malloc(sizeof(float))); 
-        memcpy(result, &fnum, sizeof(float)); 
-        $$ = result;
-    } 
     | bexp {
         printf("S-a recunoscut valoarea booleana: %s.\n", $1 ? "true" : "false");
         boolean = $1; 
@@ -285,90 +287,533 @@ exp : aexp_int {
     }
     ;
         
-aexp_int : aexp_int '+' aexp_int {$$ = $1 + $3;}
-         | '(' aexp_int '+' aexp_int ')' {$$ = $2 + $4;}
-         | aexp_int '-' aexp_int {$$ = $1 - $3;}
-         | '(' aexp_int '-' aexp_int ')' {$$ = $2 - $4;}
-         | aexp_int '*' aexp_int {$$ = $1 * $3;}
-         | '('aexp_int '*' aexp_int ')' {$$ = $2 * $4;}
-         | aexp_int '/' aexp_int {
-                if ($3 != 0)
-                    $$ = $1 / $3;
-                else {
-                    printf("Eroare, impartire la 0.\n");  
-                    exit(0);  
-                }
-            }
-         | '('aexp_int '/' aexp_int ')' {$$ = $2 / $4;}
-         | aexp_int '%' aexp_int {$$ = $1 % $3;}
-         | '(' aexp_int '%' aexp_int ')' {$$ = $2 % $4;}
-         | aexp_int '^' aexp_int {$$ = pow($1, $3);}
-         | '('aexp_int '^' aexp_int ')' {$$ = pow($2, $4);}
-         | INTEGER {$$ = $1;}
-         | ID {
-            if (strcmp(TypeOf($1), "int") == 0) {
-                $$ = *((int*)Eval($1));
+aexp : aexp '+' aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1);
+                opi2 = *((int*)$3);
+                inum = opi1 + opi2;
+                result = malloc(sizeof(int)); 
+                memcpy(result, &inum, sizeof(int));
             }
             else {
-                sprintf(msg, "%s %s %s", "Variabila", $1, "nu este de tip int sau nu este declarata");
-                yyerror(msg); 
+                opf1 = *((float*)$1);
+                opf2 = *((float*)$3);
+                fnum = opf1 + opf2;
+                result = malloc(sizeof(float)); 
+                memcpy(result, &fnum, sizeof(float));
+            }
+            $$ = result;
+        }
+    }
+    | '(' aexp '+' aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2);
+                opi2 = *((int*)$4);
+                inum = opi1 + opi2;
+                result = malloc(sizeof(int)); 
+                memcpy(result, &inum, sizeof(int));
+            }
+            else {
+                opf1 = *((float*)$2);
+                opf2 = *((float*)$4);
+                fnum = opf1 + opf2;
+                result = malloc(sizeof(float)); 
+                memcpy(result, &fnum, sizeof(float));
+            }
+            $$ = result;
+        }
+    }
+    | aexp '-' aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1);
+                opi2 = *((int*)$3);
+                inum = opi1 - opi2;
+                result = malloc(sizeof(int)); 
+                memcpy(result, &inum, sizeof(int));
+            }
+            else {
+                opf1 = *((float*)$1);
+                opf2 = *((float*)$3);
+                fnum = opf1 - opf2;
+                result = malloc(sizeof(float)); 
+                memcpy(result, &fnum, sizeof(float));
+            }
+            $$ = result;
+        }
+    }
+    | '(' aexp '-' aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2);
+                opi2 = *((int*)$4);
+                inum = opi1 - opi2;
+                result = malloc(sizeof(int)); 
+                memcpy(result, &inum, sizeof(int));
+            }
+            else {
+                opf1 = *((float*)$2);
+                opf2 = *((float*)$4);
+                fnum = opf1 - opf2;
+                result = malloc(sizeof(float)); 
+                memcpy(result, &fnum, sizeof(float));
+            }
+            $$ = result;
+        }
+    }
+    | aexp '*' aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1);
+                opi2 = *((int*)$3);
+                inum = opi1 * opi2;
+                result = malloc(sizeof(int)); 
+                memcpy(result, &inum, sizeof(int));
+            }
+            else {
+                opf1 = *((float*)$1);
+                opf2 = *((float*)$3);
+                fnum = opf1 * opf2;
+                result = malloc(sizeof(float)); 
+                memcpy(result, &fnum, sizeof(float));
+                $$ = result;
+            }
+            $$ = result;
+        }
+    }
+    | '('aexp '*' aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2);
+                opi2 = *((int*)$4);
+                inum = opi1 * opi2;
+                result = malloc(sizeof(int)); 
+                memcpy(result, &inum, sizeof(int));
+            }
+            else {
+                opf1 = *((float*)$2);
+                opf2 = *((float*)$4);
+                fnum = opf1 * opf2;
+                result = malloc(sizeof(float)); 
+                memcpy(result, &fnum, sizeof(float));
+            }
+            $$ = result;
+        }
+    }
+    | aexp '/' aexp {
+         if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1);
+                opi2 = *((int*)$3);
+                if (opi2 != 0) {
+                    inum = opi1 / opi2;
+                    result = malloc(sizeof(int)); 
+                    memcpy(result, &inum, sizeof(int));
+                    $$ = result;
+                }
+                else {
+                    yyerror("Eroare. Impartire la 0");
+                }
+            }
+            else {
+                opf1 = *((float*)$1);
+                opf2 = *((float*)$3);
+                if (opf2 != 0) {
+                    fnum = opf1 / opf2;
+                    result = malloc(sizeof(float)); 
+                    memcpy(result, &fnum, sizeof(float));
+                    $$ = result;
+                }
+                else {
+                    yyerror("Eroare, impartire la 0");  
+                }
             }
         }
-        ;
-
-aexp_float : aexp_float '+' aexp_float {$$ = $1 + $3;}
-           | '(' aexp_float '+' aexp_float ')' {$$ = $2 + $4;}
-           | aexp_float '-' aexp_float {$$ = $1 - $3;}
-           | '(' aexp_float '-' aexp_float ')' {$$ = $2 - $4;}
-           | aexp_float '*' aexp_float {$$ = $1 * $3;}
-           | '('aexp_float '*' aexp_float ')' {$$ = $2 * $4;}
-           | aexp_float '/' aexp_float {
-                if ($3 != 0)
-                    $$ = $1 / $3;
-                else {
-                    printf("Eroare, impartire la 0.\n");  
-                    exit(0);  
-                }
-            }
-           | '('aexp_float '/' aexp_float ')' {$$ = $2 / $4;}
-           | aexp_float '^' aexp_float {$$ = pow($1, $3);}
-           | '('aexp_float '^' aexp_float ')' {$$ = pow($2, $4);}
-           | FLOAT {$$ = $1;}
-           | ID {
-                if (strcmp(TypeOf($1), "float") == 0) {
-                    $$ = *((float*)Eval($1));
+    }
+    | '('aexp '/' aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2);
+                opi2 = *((int*)$4);
+                if (opi2 != 0) {
+                    inum = opi1 / opi2;
+                    result = malloc(sizeof(int)); 
+                    memcpy(result, &inum, sizeof(int));
+                    $$ = result;
                 }
                 else {
-                    sprintf(msg, "%s %s %s", "Variabila", $1, "nu este de tip float sau nu este declarata");
-                    yyerror(msg); 
+                    yyerror("Eroare. Impartire la 0"); 
                 }
             }
-           ;
+            else {
+                opf1 = *((float*)$2);
+                opf2 = *((float*)$4);
+                if (opf2 != 0) {
+                    fnum = opf1 / opf2;
+                    result = malloc(sizeof(float)); 
+                    memcpy(result, &fnum, sizeof(float));
+                    $$ = result;
+                }
+                else {
+                    yyerror("Eroare, impartire la 0");  
+                }
+            }
+        }
+    }
+    | aexp '%' aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1);
+                opi2 = *((int*)$3);
+                if (opi2 != 0) {
+                    inum = opi1 % opi2;
+                    result = malloc(sizeof(int)); 
+                    memcpy(result, &inum, sizeof(int));
+                    $$ = result;
+                }
+                else {
+                    yyerror("Eroare, impartire la 0");  
+                }
+            }
+            else {
+                yyerror("Operanzii din expresie nu sunt de tip intreg");
+            }
+        }
+    }
+    | '(' aexp '%' aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2);
+                opi2 = *((int*)$4);
+                if (opi2 != 0) {
+                    inum = opi1 % opi2;
+                    result = malloc(sizeof(int)); 
+                    memcpy(result, &inum, sizeof(int));
+                    $$ = result;
+                }
+                else {
+                    yyerror("Eroare, impartire la 0");  
+                }
+            }
+            else {
+                yyerror("Operanzii din expresie nu sunt de tip intreg");
+            }
+        }
+    }
+    | aexp '^' aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1);
+                opi2 = *((int*)$3);
+                inum = pow(opi1, opi2);
+                result = malloc(sizeof(int)); 
+                memcpy(result, &inum, sizeof(int));
+            }
+            else {
+                opf1 = *((float*)$1);
+                opf2 = *((float*)$3);
+                fnum = pow(opf1, opf2);
+                result = malloc(sizeof(float)); 
+                memcpy(result, &fnum, sizeof(float));
+            }
+            $$ = result;
+        }
+    }
+    | '('aexp '^' aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2);
+                opi2 = *((int*)$4);
+                inum = pow(opi1, opi2);
+                result = malloc(sizeof(int)); 
+                memcpy(result, &inum, sizeof(int));
+            }
+            else {
+                opf1 = *((float*)$2);
+                opf2 = *((float*)$4);
+                fnum = pow(opf1, opf2);
+                result = malloc(sizeof(float)); 
+                memcpy(result, &fnum, sizeof(float));
+            }
+            $$ = result;
+        }
+    }
+    | INTEGER {
+        strcpy(types_arr[types_arr_size++], "int"); 
+        inum = $1; 
+        result = malloc(sizeof(int)); 
+        memcpy(result, &inum, sizeof(int));
+        $$ = result;
+    }
+    | FLOAT {
+        strcpy(types_arr[types_arr_size++], "float"); 
+        fnum = $1; 
+        result = malloc(sizeof(float)); 
+        memcpy(result, &fnum, sizeof(float));
+        $$ = result;
+    }
+    | ID {
+        if (strcmp(TypeOf($1), "undefined") == 0) {
+            sprintf(msg, "%s %s %s", "Variabila", $1, "nu este declarata");
+            yyerror(msg); 
+        }
+        else {
+            strcpy(types_arr[types_arr_size++], TypeOf($1));
+            if (strcmp(TypeOf($1), "int") == 0) {
+                result = malloc(sizeof(int)); 
+                memcpy(result, Eval($1), sizeof(int)); 
+            }
+            else {
+                result = malloc(sizeof(float)); 
+                memcpy(result, Eval($1), sizeof(float)); 
+            }
+            $$ = result;
+        }
+    }
+    ;
 
-bexp : aexp_int '<' aexp_int {$$ = ($1 < $3);}
-     | '('aexp_int '<' aexp_int ')'{$$ = ($2 < $4);}
-     | aexp_int '>' aexp_int {$$ = ($1 > $3);}
-     | '('aexp_int '>' aexp_int ')'{$$ = ($2 > $4);}
-     | aexp_int LTE aexp_int {$$ = ($1 <= $3);}
-     | '(' aexp_int LTE aexp_int ')' {$$ = ($2 <= $4);}
-     | aexp_int GTE aexp_int {$$ = ($1 >= $3);}
-     | '(' aexp_int GTE aexp_int ')' {$$ = ($2 >= $4);}
-     | aexp_int EQ aexp_int {$$ = ($1 == $3);}
-     | '(' aexp_int EQ aexp_int ')' {$$ = ($2 == $4);}
-     | aexp_int NEQ aexp_int {$$ = ($1 != $3);}
-     | '(' aexp_int NEQ aexp_int ')' {$$ = ($2 != $4);} 
-     | aexp_float '<' aexp_float {$$ = ($1 < $3);}
-     | '('aexp_float '<' aexp_float ')'{$$ = ($2 < $4);}
-     | aexp_float '>' aexp_float {$$ = ($1 > $3);}
-     | '('aexp_float '>' aexp_float ')'{$$ = ($2 > $4);}
-     | aexp_float LTE aexp_float {$$ = ($1 <= $3);}
-     | '(' aexp_float LTE aexp_float ')' {$$ = ($2 <= $4);}
-     | aexp_float GTE aexp_float {$$ = ($1 >= $3);}
-     | '(' aexp_float GTE aexp_float ')' {$$ = ($2 >= $4);}
-     | aexp_float EQ aexp_float {$$ = ($1 == $3);}
-     | '(' aexp_float EQ aexp_float ')' {$$ = ($2 == $4);}
-     | aexp_float NEQ aexp_float {$$ = ($1 != $3);}
-     | '(' aexp_float NEQ aexp_float ')' {$$ = ($2 != $4);} 
+bexp : aexp '<' aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1); 
+                opi2 = *((int*)$3);
+                $$ = (opi1 < opi2); 
+            }
+            else {
+                opf1 = *((float*)$1); 
+                opf2 = *((float*)$3);
+                $$ = (opf1 < opf2);  
+            }
+        }
+     }
+     | '('aexp '<' aexp ')'{
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2); 
+                opi2 = *((int*)$4);
+                $$ = (opi1 < opi2); 
+            }
+            else {
+                opf1 = *((float*)$2); 
+                opf2 = *((float*)$4);
+                $$ = (opf1 < opf2);  
+            }
+        }
+     }
+     | aexp '>' aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1); 
+                opi2 = *((int*)$3);
+                $$ = (opi1 > opi2); 
+            }
+            else {
+                opf1 = *((float*)$1); 
+                opf2 = *((float*)$3);
+                $$ = (opf1 > opf2);  
+            }
+        }
+    }
+     | '('aexp '>' aexp ')'{
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2); 
+                opi2 = *((int*)$4);
+                $$ = (opi1 > opi2); 
+            }
+            else {
+                opf1 = *((float*)$2); 
+                opf2 = *((float*)$4);
+                $$ = (opf1 > opf2);  
+            }
+        }
+     }
+     | aexp LTE aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1); 
+                opi2 = *((int*)$3);
+                $$ = (opi1 <= opi2); 
+            }
+            else {
+                opf1 = *((float*)$1); 
+                opf2 = *((float*)$3);
+                $$ = (opf1 <= opf2);  
+            }
+        }
+     }
+     | '(' aexp LTE aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2); 
+                opi2 = *((int*)$4);
+                $$ = (opi1 <= opi2); 
+            }
+            else {
+                opf1 = *((float*)$2); 
+                opf2 = *((float*)$4);
+                $$ = (opf1 <= opf2);  
+            }
+        }
+     }
+     | aexp GTE aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1); 
+                opi2 = *((int*)$3);
+                $$ = (opi1 >= opi2); 
+            }
+            else {
+                opf1 = *((float*)$1); 
+                opf2 = *((float*)$3);
+                $$ = (opf1 >= opf2);  
+            }
+        }
+     }
+     | '(' aexp GTE aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2); 
+                opi2 = *((int*)$4);
+                $$ = (opi1 >= opi2); 
+            }
+            else {
+                opf1 = *((float*)$2); 
+                opf2 = *((float*)$4);
+                $$ = (opf1 >= opf2);  
+            }
+        }
+     }
+     | aexp EQ aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1); 
+                opi2 = *((int*)$3);
+                $$ = (opi1 == opi2); 
+            }
+            else {
+                opf1 = *((float*)$1); 
+                opf2 = *((float*)$3);
+                $$ = (opf1 == opf2);  
+            }
+        }
+     }
+     | '(' aexp EQ aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2); 
+                opi2 = *((int*)$4);
+                $$ = (opi1 == opi2); 
+            }
+            else {
+                opf1 = *((float*)$2); 
+                opf2 = *((float*)$4);
+                $$ = (opf1 == opf2);  
+            }
+        }
+     }
+     | aexp NEQ aexp {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$1); 
+                opi2 = *((int*)$3);
+                $$ = (opi1 != opi2); 
+            }
+            else {
+                opf1 = *((float*)$1); 
+                opf2 = *((float*)$3);
+                $$ = (opf1 != opf2);  
+            }
+        }
+     }
+     | '(' aexp NEQ aexp ')' {
+        if (!checkTypes()) {
+            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+        }
+        else {
+            if (strcmp(types_arr[0], "int") == 0) {
+                opi1 = *((int*)$2); 
+                opi2 = *((int*)$4);
+                $$ = (opi1 != opi2); 
+            }
+            else {
+                opf1 = *((float*)$2); 
+                opf2 = *((float*)$4);
+                $$ = (opf1 != opf2);  
+            }
+        }
+     } 
      | bexp AND bexp {$$ = ($1 && $3);}
      | '(' bexp AND bexp ')' {$$ = ($2 && $4);}
      | bexp OR bexp {$$ = ($1 || $3);}
@@ -386,16 +831,20 @@ str : str '+' str {
         strcat(s, $3); 
         $$ = s;        
     }
-    | str '^' aexp_int {
-        if($3 == 0) {
-            $$ = '\0';
-        }
-        else {   
-            char *s = strdup($1);
-			for(int i = 1; i < $3; ++i)
-			    s = strcat(s, $1);
-            $$ = s;
-        }   
+    | str '^' aexp {
+        if (strcmp(types_arr[0], "int") == 0) {
+            inum = *((int*)$3);
+            if(inum == 0) {
+                $$ = '\0';
+            }
+            else {   
+                char *s = strdup($1);
+                for(int i = 1; i < inum; ++i)
+                    s = strcat(s, $1);
+                $$ = s;
+            }
+        }  
+
     }
     | str '%' str {
         char* aux = strdup("");

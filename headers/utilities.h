@@ -12,6 +12,9 @@ extern int yylineno;
 void yyerror(char * s);
 int yylex();
 
+char types_arr[150][150];
+int types_arr_size;
+
 struct symbol_table {
     char* name; 
     char* type;
@@ -86,7 +89,7 @@ int insertVar(char* name, char* type, void* address) {
     for (int i = 0; i < vars_size; ++i) {
         if (strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].type, type) == 0) {
             char msg[100]; 
-            sprintf(msg, "%s %s %s %s", "Variabila", name, type, "exista deja");
+            sprintf(msg, "%s %s %s", "Variabila", name, "exista deja");
             yyerror(msg);
             return -1;
         }
@@ -99,7 +102,8 @@ int insertVar(char* name, char* type, void* address) {
 }
 
 void yyerror(char * s) {
-    printf("eroare: %s la linia %d.\n", s, yylineno);
+    printf("eroare: %s, la linia %d.\n", s, yylineno);
+    exit(0);
 }
 
 void print_symbol_table(FILE* fptr) {
@@ -124,6 +128,17 @@ void print_symbol_table(FILE* fptr) {
         }
         fprintf(fptr, "-------------------------------------------------------------------------------------------\n");
     }
+}
+
+bool checkTypes() {
+    for (int i = 0; i < types_arr_size - 1; ++i) {
+        for (int j = i + 1; j < types_arr_size; ++j) {
+            if (strcmp(types_arr[i], types_arr[j]) != 0) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 #endif
