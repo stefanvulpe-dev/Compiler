@@ -1,0 +1,19 @@
+int a ::= 10 - 5; 
+int x ::= 2; 
+string nume ::= "Stefan"; 
+char character ::= 'a';
+char charArray[100][100][200][300];
+
+const char char_value ::= 'a';
+
+int f(); 
+int g(string str[100]); 
+
+begin_main():
+    cmmdc(f(), cmmdc(a, b));
+    Train->passangers; 
+    Train->get_company(); 
+    Train->get_first_letter("1234"); 
+end_main
+
+
