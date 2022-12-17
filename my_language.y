@@ -6,7 +6,7 @@ extern FILE* yyin;
 extern char* yytext;
 
 void* result;
-char msg[ARR_SIZE], var_type[ARR_SIZE], var_name[ARR_SIZE], scope[ARR_SIZE];
+char msg[ARR_SIZE], var_type[ARR_SIZE], var_name[ARR_SIZE], scope[ARR_SIZE], arr_type[ARR_SIZE], init_list[ARR_SIZE], element[ARR_SIZE];
 int inum;
 float fnum; 
 bool boolean;
@@ -36,9 +36,14 @@ char* string;
 %type <int_value>aexp_int
 %type <float_value>aexp_float
 %type <boolean_value>bexp
-%type <int_value>avars_int
 %type <str_value>str
 %type <address>exp
+%type <str_value>initialization_list
+%type <str_value>initialization_list_int
+%type <str_value>initialization_list_float
+%type <str_value>initialization_list_bool
+%type <str_value>initialization_list_char
+%type <str_value>initialization_list_string
 
 %left AND OR
 %left '<' '>' LTE GTE NEQ EQ
@@ -59,15 +64,130 @@ global_declaration : CONST TIP ID ASSIGN exp {
                         sprintf(var_type, "%s %s", $1, $2);
                         insertVar(var_name, var_type, $5);
                    }
-                   | TIP ID ASSIGN exp 
-                   | TIP ID
-                   | CONST TIP ID brackets ASSIGN exp
-                   | TIP ID brackets
+                   | TIP ID ASSIGN exp {
+                        var_name[0] = '\0';
+                        strcpy(scope, "global");
+                        strcat(var_name, $2); 
+                        strcat(var_name, "::"); 
+                        strcat(var_name, scope);
+                        sprintf(var_type, "%s", $1);
+                        insertVar(var_name, var_type, $4);
+                   }
+                   | CONST TIP ID brackets ASSIGN '{' initialization_list '}' {
+                        strcpy(arr_type, $2);
+                        var_name[0] = '\0';
+                        strcpy(scope, "global");
+                        strcat(var_name, $3); 
+                        strcat(var_name, "::"); 
+                        strcat(var_name, scope);
+                        sprintf(var_type, "%s %s*", $1, $2);
+                        insertVar(var_name, var_type, $7);
+                   }
+                   | TIP ID brackets ASSIGN '{' initialization_list '}' {
+                        strcpy(arr_type, $1);
+                        var_name[0] = '\0';
+                        strcpy(scope, "global");
+                        strcat(var_name, $2); 
+                        strcat(var_name, "::"); 
+                        strcat(var_name, scope);
+                        sprintf(var_type, "%s*", $1);
+                        insertVar(var_name, var_type, $6);
+                   }
                    ;
 
-brackets : '[' INTEGER ']' brackets 
-         | '[' INTEGER ']'
+brackets : '[' INTEGER ']' brackets { 
+            if ($2 < 0) {
+                yyerror("Eroare. Dimensiune negativa a array-ului");
+            } 
+         }
+         | '[' INTEGER ']' {
+            if ($2 < 0) {
+                yyerror("Eroare. Dimensiune negativa a array-ului");
+            } 
+         }
          ;
+
+initialization_list : initialization_list_int {$$ = $1;}
+                    | initialization_list_float {$$ = $1;}
+                    | initialization_list_bool {$$ = $1;}
+                    | initialization_list_char {$$ = $1;}
+                    | initialization_list_string {$$ = $1;}
+                    ;
+
+initialization_list_int : INTEGER ',' initialization_list_int {
+                            element[0] = '\0';
+                            sprintf(element, "%d", $1); 
+                            strcat(init_list, element);
+                            strcat(init_list, ", ");
+                        }
+                        | INTEGER {
+                            element[0] = '\0';
+                            sprintf(element, "%d", $1);
+                            strcat(init_list, element); 
+                            $$ = strdup(init_list);
+                            init_list[0] = '\0';
+                        }
+                        ;
+                        
+initialization_list_float : FLOAT ',' initialization_list_float {
+                            element[0] = '\0';
+                            sprintf(element, "%f", $1); 
+                            strcat(init_list, element);
+                            strcat(init_list, ", ");
+                          }
+                          | FLOAT {
+                            element[0] = '\0';
+                            sprintf(element, "%f", $1);
+                            strcat(init_list, element); 
+                            $$ = strdup(init_list);
+                            init_list[0] = '\0';
+                          }
+                          ;
+
+initialization_list_bool : BOOLEAN ',' initialization_list_bool {
+                            element[0] = '\0';
+                            sprintf(element, "%s", $1 ? "true" : "false");
+                            strcat(init_list, element); 
+                            strcat(init_list, ", ");
+                         }
+                        | BOOLEAN {
+                            element[0] = '\0';
+                            sprintf(element, "%s", $1 ? "true" : "false");
+                            strcat(init_list, element); 
+                            $$ = strdup(init_list);
+                            init_list[0] = '\0';
+                        }
+                        ;
+
+initialization_list_char : CHAR ',' initialization_list_char {
+                            element[0] = '\0';
+                            sprintf(element, "%c", $1); 
+                            strcat(init_list, element);
+                            strcat(init_list, ", ");
+                         }
+                        | CHAR {
+                            element[0] = '\0';
+                            sprintf(element, "%c", $1);
+                            strcat(init_list, element); 
+                            $$ = strdup(init_list);
+                            init_list[0] = '\0';
+                        }
+                        ;
+
+initialization_list_string : STRING ',' initialization_list_int {
+                                element[0] = '\0';
+                                sprintf(element, "%s", $1);
+                                strcat(init_list, element); 
+                                strcat(init_list, ", ");
+                            }
+                            | STRING {
+                                element[0] = '\0';
+                                sprintf(element, "%s", $1);
+                                strcat(init_list, element); 
+                                $$ = strdup(init_list);
+                                init_list[0] = '\0';
+                            }
+                            ;
 
 functions : function_declaration ';' functions 
           | function_declaration '{' statements '}' functions
@@ -128,14 +248,7 @@ param : ID '(' ')'
       | exp
       ;
 
-exp : avars_int {
-        printf("S-a recunoscut valoarea expresiei intregi pe variabile %d.\n", $1);
-        inum = $1; 
-        result = (void*)(malloc(sizeof(int))); 
-        memcpy(result, &inum, sizeof(int)); 
-        $$ = result;
-    }
-    | aexp_int {
+exp : aexp_int {
         printf("S-a recunoscut valoarea numerica %d.\n", $1);
         inum = $1; 
         result = (void*)(malloc(sizeof(int))); 
@@ -171,57 +284,6 @@ exp : avars_int {
         $$ = result;
     }
     ;
-
-avars_int : avars_int '+' avars_int {$$ = $1 + $3;}
-        | '(' avars_int '+' avars_int ')' {$$ = $2 + $4;}
-        | avars_int '-' avars_int {$$ = $1 - $3;}
-        | '(' avars_int '-' avars_int ')' {$$ = $2 - $4;}
-        | avars_int '*' avars_int {$$ = $1 * $3;}
-        | '(' avars_int '*' avars_int ')' {$$ = $2 * $4;}
-        | avars_int '/' avars_int {
-            if ($3 != 0)
-                $$ = $1 / $3;
-            else {
-                printf("Eroare, impartire la 0.\n");  
-                exit(0);  
-            }
-        }
-        | '(' avars_int '/' avars_int ')' {
-            if ($4 != 0)
-                $$ = $2 / $4;
-            else {
-                printf("Eroare, impartire la 0.\n");  
-                exit(0);  
-            }
-        }
-        | avars_int '%' avars_int {
-            if ($3 != 0)
-                $$ = $1 % $3;
-            else {
-                printf("Eroare, impartire la 0.\n");  
-                exit(0);  
-            }
-        }
-        | '(' avars_int '%' avars_int ')' {
-            if ($4 != 0)
-                $$ = $2 % $4;
-            else {
-                printf("Eroare, impartire la 0.\n");  
-                exit(0);  
-            }
-        }
-        | avars_int '^' avars_int {$$ = pow($1, $3);}
-        | '('avars_int '^' avars_int ')' {$$ = pow($2, $4);}
-        | ID {
-            if (strcmp(TypeOf($1), "int") == 0) {
-                $$ = *((int*)Eval($1));
-            }
-            else {
-                sprintf(msg, "%s %s %s", "Variabila", $1, "nu este de tip int sau nu este declarata");
-                yyerror(msg); 
-            }
-        }
-        ;
         
 aexp_int : aexp_int '+' aexp_int {$$ = $1 + $3;}
          | '(' aexp_int '+' aexp_int ')' {$$ = $2 + $4;}
@@ -243,7 +305,16 @@ aexp_int : aexp_int '+' aexp_int {$$ = $1 + $3;}
          | aexp_int '^' aexp_int {$$ = pow($1, $3);}
          | '('aexp_int '^' aexp_int ')' {$$ = pow($2, $4);}
          | INTEGER {$$ = $1;}
-         ;
+         | ID {
+            if (strcmp(TypeOf($1), "int") == 0) {
+                $$ = *((int*)Eval($1));
+            }
+            else {
+                sprintf(msg, "%s %s %s", "Variabila", $1, "nu este de tip int sau nu este declarata");
+                yyerror(msg); 
+            }
+        }
+        ;
 
 aexp_float : aexp_float '+' aexp_float {$$ = $1 + $3;}
            | '(' aexp_float '+' aexp_float ')' {$$ = $2 + $4;}
@@ -262,7 +333,16 @@ aexp_float : aexp_float '+' aexp_float {$$ = $1 + $3;}
            | '('aexp_float '/' aexp_float ')' {$$ = $2 / $4;}
            | aexp_float '^' aexp_float {$$ = pow($1, $3);}
            | '('aexp_float '^' aexp_float ')' {$$ = pow($2, $4);}
-           | FLOAT {$$ = $<float_value>1;}
+           | FLOAT {$$ = $1;}
+           | ID {
+                if (strcmp(TypeOf($1), "float") == 0) {
+                    $$ = *((float*)Eval($1));
+                }
+                else {
+                    sprintf(msg, "%s %s %s", "Variabila", $1, "nu este de tip float sau nu este declarata");
+                    yyerror(msg); 
+                }
+            }
            ;
 
 bexp : aexp_int '<' aexp_int {$$ = ($1 < $3);}
@@ -277,18 +357,6 @@ bexp : aexp_int '<' aexp_int {$$ = ($1 < $3);}
      | '(' aexp_int EQ aexp_int ')' {$$ = ($2 == $4);}
      | aexp_int NEQ aexp_int {$$ = ($1 != $3);}
      | '(' aexp_int NEQ aexp_int ')' {$$ = ($2 != $4);} 
-     | avars_int '<' avars_int {$$ = ($1 < $3);}
-     | '('avars_int '<' avars_int ')'{$$ = ($2 < $4);}
-     | avars_int '>' avars_int {$$ = ($1 > $3);}
-     | '('avars_int '>' avars_int ')'{$$ = ($2 > $4);}
-     | avars_int LTE avars_int {$$ = ($1 <= $3);}
-     | '(' avars_int LTE avars_int ')' {$$ = ($2 <= $4);}
-     | avars_int GTE avars_int {$$ = ($1 >= $3);}
-     | '(' avars_int GTE avars_int ')' {$$ = ($2 >= $4);}
-     | avars_int EQ avars_int {$$ = ($1 == $3);}
-     | '(' avars_int EQ avars_int ')' {$$ = ($2 == $4);}
-     | avars_int NEQ avars_int {$$ = ($1 != $3);}
-     | '(' avars_int NEQ avars_int ')' {$$ = ($2 != $4);} 
      | aexp_float '<' aexp_float {$$ = ($1 < $3);}
      | '('aexp_float '<' aexp_float ')'{$$ = ($2 < $4);}
      | aexp_float '>' aexp_float {$$ = ($1 > $3);}

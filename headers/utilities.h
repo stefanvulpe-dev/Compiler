@@ -119,7 +119,7 @@ void print_symbol_table(FILE* fptr) {
         else if (strstr(variables_table[i].type, "char")) {
             fprintf(fptr, "[%c]\n", *((char*)variables_table[i].address));
         }
-        else if (strcmp(variables_table[i].type, "string")) {
+        else if (strstr(variables_table[i].type, "string")) {
             fprintf(fptr, "[%s]\n", ((char*)variables_table[i].address));
         }
         fprintf(fptr, "-------------------------------------------------------------------------------------------\n");
