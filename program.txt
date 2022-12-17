@@ -9,10 +9,19 @@ int f();
 int g(string str[100]); 
 
 begin_main():
-    cmmdc(f(), cmmdc(a, x));
+    cmmdc(f(), cmmdc(2, 3));
     Train->passangers; 
     Train->get_company(); 
     Train->get_first_letter("1234"); 
+
+    if (2 < 3) {
+       int sigma ::= 100 + 200; 
+    }
+
+    for ( ; ; ) {
+        bool cond ::= (false && true) || (!true || !false);
+    }
+
 end_main
 
 

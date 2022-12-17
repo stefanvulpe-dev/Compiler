@@ -66,12 +66,16 @@ extern int yydebug;
     END = 267,                     /* END  */
     ASSIGN = 268,                  /* ASSIGN  */
     CLASS = 269,                   /* CLASS  */
-    AND = 270,                     /* AND  */
-    OR = 271,                      /* OR  */
-    LTE = 272,                     /* LTE  */
-    GTE = 273,                     /* GTE  */
-    NEQ = 274,                     /* NEQ  */
-    EQ = 275                       /* EQ  */
+    IF = 270,                      /* IF  */
+    ELSE = 271,                    /* ELSE  */
+    FOR_LOOP = 272,                /* FOR_LOOP  */
+    WHILE_LOOP = 273,              /* WHILE_LOOP  */
+    AND = 274,                     /* AND  */
+    OR = 275,                      /* OR  */
+    LTE = 276,                     /* LTE  */
+    GTE = 277,                     /* GTE  */
+    NEQ = 278,                     /* NEQ  */
+    EQ = 279                       /* EQ  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -89,7 +93,7 @@ union YYSTYPE
     bool boolean_value;
     void* address;
 
-#line 93 "./headers/my_language.tab.h"
+#line 97 "./headers/my_language.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

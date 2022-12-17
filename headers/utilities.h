@@ -16,7 +16,8 @@ char types_arr[150][150];
 int types_arr_size;
 
 struct symbol_table {
-    char* name; 
+    char* name;
+    char* scope; 
     char* type;
     void* address;
 } variables_table[150];
@@ -85,9 +86,19 @@ void* EvalName(char* name) {
 
 #define Eval(x) _Generic (x, int: EvalInt, float: EvalFloat, bool: EvalBool, char: EvalChar, char*: EvalName)(x)
 
-int insertVar(char* name, char* type, void* address) {
+// int searchVar(char* name, char* type, char* scope) {
+//     for (int i = 0; i < vars_size; ++i) {
+//         if (strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].type, type) == 0) {
+            
+//             return 1;
+//         }
+//     }
+
+// }
+
+int insertVar(char* name, char* type, char* scope, void* address) {
     for (int i = 0; i < vars_size; ++i) {
-        if (strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].type, type) == 0) {
+        if (strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].type, type) == 0 && strcmp(variables_table[i].scope, scope) == 0) {
             char msg[100]; 
             sprintf(msg, "%s %s %s", "Variabila", name, "exista deja");
             yyerror(msg);
@@ -96,6 +107,7 @@ int insertVar(char* name, char* type, void* address) {
     }
     variables_table[vars_size].name = strdup(name); 
     variables_table[vars_size].type = strdup(type); 
+    variables_table[vars_size].scope = strdup(scope); 
     variables_table[vars_size].address = address;
     vars_size++;
     return 0;
@@ -110,7 +122,7 @@ void print_symbol_table(FILE* fptr) {
     fprintf(fptr, "Name::scope  --->  <Type>  [Value]\n");
     fprintf(fptr, "-------------------------------------------------------------------------------------------\n");
     for (int i = 0; i < vars_size; ++i) {
-        fprintf(fptr, "%s  --->  <%s>  ", variables_table[i].name, variables_table[i].type);
+        fprintf(fptr, "%s::%s  --->  <%s>  ", variables_table[i].name, variables_table[i].scope, variables_table[i].type);
         if (strstr(variables_table[i].type, "int")) {
             fprintf(fptr, "[%d]\n", *((int*)variables_table[i].address));
         }

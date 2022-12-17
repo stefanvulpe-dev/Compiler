@@ -24,6 +24,10 @@ number -?(({digit}|{non_zero_digit}{digit}*))("."[0-9]+)?
     yylval.str_value = strdup(yytext);
     return CLASS;
 }
+"if" {return IF;}
+"else" {return ELSE;}
+"for" {return FOR_LOOP;}
+"while" {return WHILE_LOOP;}
 "::=" {return ASSIGN;}
 "&&" {return AND;}
 "||" {return OR;}

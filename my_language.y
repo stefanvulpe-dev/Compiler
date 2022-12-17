@@ -32,7 +32,7 @@ char* string;
 %token <char_value>CHAR
 %token <boolean_value>BOOLEAN
 %token <str_value>TIP
-%token BGIN END ASSIGN CLASS AND OR LTE GTE NEQ EQ
+%token BGIN END ASSIGN CLASS IF ELSE FOR_LOOP WHILE_LOOP AND OR LTE GTE NEQ EQ
 %type <boolean_value>bexp
 %type <str_value>str
 %type <address>exp
@@ -62,7 +62,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                         strcat(var_name, "::"); 
                         strcat(var_name, scope);
                         sprintf(var_type, "%s %s", $1, $2);
-                        insertVar(var_name, var_type, $5);
+                        insertVar(var_name, var_type, scope, $5);
                    }
                    | TIP ID ASSIGN exp {
                         types_arr_size = 0;
@@ -72,7 +72,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                         strcat(var_name, "::"); 
                         strcat(var_name, scope);
                         sprintf(var_type, "%s", $1);
-                        insertVar(var_name, var_type, $4);
+                        insertVar(var_name, var_type, scope, $4);
                    }
                    | CONST TIP ID brackets ASSIGN '{' initialization_list '}' {
                         strcpy(arr_type, $2);
@@ -82,7 +82,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                         strcat(var_name, "::"); 
                         strcat(var_name, scope);
                         sprintf(var_type, "%s %s*", $1, $2);
-                        insertVar(var_name, var_type, $7);
+                        insertVar(var_name, var_type, scope, $7);
                    }
                    | TIP ID brackets ASSIGN '{' initialization_list '}' {
                         strcpy(arr_type, $1);
@@ -92,7 +92,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                         strcat(var_name, "::"); 
                         strcat(var_name, scope);
                         sprintf(var_type, "%s*", $1);
-                        insertVar(var_name, var_type, $6);
+                        insertVar(var_name, var_type, scope, $6);
                    }
                    ;
 
@@ -225,19 +225,32 @@ class_declaration : CONST TIP ID ASSIGN exp
 program : BGIN '(' ')' ':' statements END {printf("Program corect sintactic.\n");}
         ;
 
-statements : statement ';' statements 
+statements : statement statements 
            | %empty
            ;
 
-statement : TIP ID ASSIGN exp 
-          | CONST TIP ID ASSIGN exp
-          | TIP ID
-          | ID ASSIGN exp
-          | ID '(' ')'
-          | ID '(' params ')'
-          | ID '-' '>' ID 
-          | ID '-' '>' ID '(' ')'
-          | ID '-' '>' ID '(' param ')'
+statement : TIP ID ASSIGN exp ';'
+          | CONST TIP ID ASSIGN exp ';'
+          | ID ASSIGN exp ';'
+          | ID '(' ')' ';'
+          | ID '(' params ')' ';'
+          | ID '-' '>' ID ';'
+          | ID '-' '>' ID '(' ')' ';'
+          | ID '-' '>' ID '(' param ')' ';'
+          | IF '(' bexp ')' '{' statements '}' 
+          | WHILE_LOOP '(' bexp ')' '{' statements '}' 
+          | FOR_LOOP  '(' init ';' cond ';' increment ')' '{' statements '}' 
+          ;
+
+init : TIP ID ASSIGN
+     | %empty;
+
+cond : bexp 
+     | %empty
+     ;
+
+increment : ID ASSIGN exp
+          | %empty
           ;
 
 params : param ',' params 
