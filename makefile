@@ -7,3 +7,7 @@ clean:
 	rm -rf parserd_program ./headers/my_language.tab.c ./headers/my_language.tab.h ./headers/lex.yy.c
 run: all 
 	./parserd_program program.txt symbol_table.txt
+git: 
+	git add .
+	git commit -m "$m"
+	git push
