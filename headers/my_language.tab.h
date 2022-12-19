@@ -84,7 +84,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 17 "my_language.y"
+#line 20 "my_language.y"
 
     int int_value;
     char* str_value;

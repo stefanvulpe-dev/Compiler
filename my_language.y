@@ -12,6 +12,9 @@ float fnum, opf1, opf2;
 bool boolean;
 char character;
 char* string;
+
+struct symbol_table tmp_vars[100];
+int tmp_size = 0;
 %}
 
 %union {
@@ -59,40 +62,42 @@ global_declaration : CONST TIP ID ASSIGN exp {
                         var_name[0] = '\0';
                         strcpy(scope, "global");
                         strcat(var_name, $3); 
-                        strcat(var_name, "::"); 
-                        strcat(var_name, scope);
                         sprintf(var_type, "%s %s", $1, $2);
-                        insertVar(var_name, var_type, scope, $5);
+                        insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
                    }
                    | TIP ID ASSIGN exp {
                         types_arr_size = 0;
                         var_name[0] = '\0';
                         strcpy(scope, "global");
                         strcat(var_name, $2); 
-                        strcat(var_name, "::"); 
-                        strcat(var_name, scope);
                         sprintf(var_type, "%s", $1);
-                        insertVar(var_name, var_type, scope, $4);
+                        insertVar(variables_table, &vars_size, var_name, var_type, scope, $4);
                    }
                    | CONST TIP ID brackets ASSIGN '{' initialization_list '}' {
-                        strcpy(arr_type, $2);
+                        init_list[0] = '\0';
                         var_name[0] = '\0';
-                        strcpy(scope, "global");
-                        strcat(var_name, $3); 
-                        strcat(var_name, "::"); 
-                        strcat(var_name, scope);
-                        sprintf(var_type, "%s %s*", $1, $2);
-                        insertVar(var_name, var_type, scope, $7);
+                        if (strcmp(arr_type, $2) == 0) {
+                            strcpy(scope, "global");
+                            strcat(var_name, $3); 
+                            sprintf(var_type, "%s %s[]", $1, $2);
+                            insertVar(variables_table, &vars_size, var_name, var_type, scope, $7);
+                        }
+                        else {
+                            yyerror("Tipul elementelor din lista de initializare este diferit de tipul array-ului");
+                        }
                    }
                    | TIP ID brackets ASSIGN '{' initialization_list '}' {
-                        strcpy(arr_type, $1);
+                        init_list[0] = '\0';
                         var_name[0] = '\0';
-                        strcpy(scope, "global");
-                        strcat(var_name, $2); 
-                        strcat(var_name, "::"); 
-                        strcat(var_name, scope);
-                        sprintf(var_type, "%s*", $1);
-                        insertVar(var_name, var_type, scope, $6);
+                        if (strcmp(arr_type, $1) == 0) {
+                            strcpy(scope, "global");
+                            strcat(var_name, $2); 
+                            sprintf(var_type, "%s[]", $1);
+                            insertVar(variables_table, &vars_size, var_name, var_type, scope, $6);
+                        }
+                        else {
+                            yyerror("Tipul elementelor din lista de initializare este diferit de tipul array-ului");
+                        }
                    }
                    ;
 
@@ -108,25 +113,42 @@ brackets : '[' INTEGER ']' brackets {
          }
          ;
 
-initialization_list : initialization_list_int {$$ = $1;}
-                    | initialization_list_float {$$ = $1;}
-                    | initialization_list_bool {$$ = $1;}
-                    | initialization_list_char {$$ = $1;}
-                    | initialization_list_string {$$ = $1;}
+initialization_list : initialization_list_int {
+                        strcpy(arr_type, "int");
+                        $$ = strrev($1);
+                    }
+                    | initialization_list_float {
+                        strcpy(arr_type, "float");
+                        $$ = strrev($1);
+                    }
+                    | initialization_list_bool {
+                        strcpy(arr_type, "bool");
+                        $$ = strrev($1);
+                    }
+                    | initialization_list_char {
+                        strcpy(arr_type, "char");
+                        $$ = strrev($1);
+                    }
+                    | initialization_list_string {
+                        strcpy(arr_type, "string");
+                        $$ = strrev($1);
+                    }
                     ;
 
 initialization_list_int : INTEGER ',' initialization_list_int {
                             element[0] = '\0';
                             sprintf(element, "%d", $1); 
                             strcat(init_list, element);
-                            strcat(init_list, ", ");
+                            strcat(init_list, " ");
+                            $$ = strdup(init_list);
                         }
                         | INTEGER {
                             element[0] = '\0';
                             sprintf(element, "%d", $1);
+                            strcat(init_list, " ");
                             strcat(init_list, element); 
+                            strcat(init_list, " ");
                             $$ = strdup(init_list);
-                            init_list[0] = '\0';
                         }
                         ;
                         
@@ -134,14 +156,16 @@ initialization_list_float : FLOAT ',' initialization_list_float {
                             element[0] = '\0';
                             sprintf(element, "%f", $1); 
                             strcat(init_list, element);
-                            strcat(init_list, ", ");
+                            strcat(init_list, " ");
+                            $$ = strdup(init_list);
                           }
                           | FLOAT {
                             element[0] = '\0';
                             sprintf(element, "%f", $1);
+                            strcat(init_list, " ");
                             strcat(init_list, element); 
+                            strcat(init_list, " ");
                             $$ = strdup(init_list);
-                            init_list[0] = '\0';
                           }
                           ;
 
@@ -149,14 +173,16 @@ initialization_list_bool : BOOLEAN ',' initialization_list_bool {
                             element[0] = '\0';
                             sprintf(element, "%s", $1 ? "true" : "false");
                             strcat(init_list, element); 
-                            strcat(init_list, ", ");
+                            strcat(init_list, " ");
+                            $$ = strdup(init_list);
                          }
                         | BOOLEAN {
                             element[0] = '\0';
                             sprintf(element, "%s", $1 ? "true" : "false");
-                            strcat(init_list, element); 
+                            strcat(init_list, " ");
+                            strcat(init_list, element);
+                            strcat(init_list, " "); 
                             $$ = strdup(init_list);
-                            init_list[0] = '\0';
                         }
                         ;
 
@@ -164,39 +190,47 @@ initialization_list_char : CHAR ',' initialization_list_char {
                             element[0] = '\0';
                             sprintf(element, "%c", $1); 
                             strcat(init_list, element);
-                            strcat(init_list, ", ");
-                         }
+                            strcat(init_list, " ");
+                            $$ = strdup(init_list);
+                        }
                         | CHAR {
                             element[0] = '\0';
                             sprintf(element, "%c", $1);
-                            strcat(init_list, element); 
+                            strcat(init_list, " ");
+                            strcat(init_list, element);
+                            strcat(init_list, " "); 
                             $$ = strdup(init_list);
-                            init_list[0] = '\0';
                         }
                         ;
 
-initialization_list_string : STRING ',' initialization_list_int {
+initialization_list_string : STRING ',' initialization_list_string {
                                 element[0] = '\0';
                                 sprintf(element, "%s", $1);
                                 strcat(init_list, element); 
-                                strcat(init_list, ", ");
+                                strcat(init_list, " ");
+                                $$ = strdup(init_list);
                             }
                             | STRING {
                                 element[0] = '\0';
                                 sprintf(element, "%s", $1);
+                                strcat(init_list, " ");
                                 strcat(init_list, element); 
+                                strcat(init_list, " ");
                                 $$ = strdup(init_list);
-                                init_list[0] = '\0';
                             }
                             ;
 
 functions : function_declaration ';' functions 
-          | function_declaration '{' statements '}' functions
+          | function_declaration '{' function_statements '}' functions 
           | classes
           ;
 
-function_declaration : TIP ID '(' ')'  { strcpy(scope, $2); }
-                     | TIP ID '(' param_list ')' { strcpy(scope, $2); }
+function_declaration : TIP ID '(' ')'  { 
+                        strcpy(scope, $2);
+                     }
+                     | TIP ID '(' param_list ')' { 
+                        strcpy(scope, $2); 
+                     }
                      ;
 
 param_list : TIP ID ',' param_list
@@ -205,44 +239,123 @@ param_list : TIP ID ',' param_list
            | TIP ID brackets
            ;
 
-classes : CLASS ID '{' class_declarations '}' ';' classes { strcpy(scope, $2); }
-        | program
+function_statements : function_statement function_statements 
+                    | %empty
+                    ;
+
+function_statement : TIP ID ASSIGN exp ';' {
+                            var_name[0] = '\0';
+                            insertVar(variables_table, &vars_size, $2, $1, scope, $4);
+                    }
+                    | CONST TIP ID ASSIGN exp ';' {
+                            var_name[0] = '\0';
+                            strcpy(var_name, $3);
+                            sprintf(var_type, "%s %s", $1, $2);
+                            insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                    }
+                    | ID ASSIGN exp ';'
+                    | ID '[' INTEGER ']' ASSIGN exp ';'
+                    | ID '[' ID ']' ASSIGN exp ';'
+                    | ID '(' ')' ';'
+                    | ID '(' params ')' ';'
+                    | ID '-' '>' ID ';'
+                    | ID '-' '>' ID '(' ')' ';'
+                    | ID '-' '>' ID '(' param ')' ';'
+                    | IF '(' bexp ')' '{' function_statements '}' 
+                    | IF '(' bexp ')' '{' function_statements '}' ELSE '{' function_statements '}'
+                    | WHILE_LOOP '(' bexp ')' '{' function_statements '}' 
+                    | FOR_LOOP  '(' init ';' cond ';' increment ')' '{' function_statements '}' 
+                    ;
+
+classes : CLASS ID '{' class_declarations '}' ';' classes { 
+            strcpy(scope, $2); 
+            update_table(tmp_vars, variables_table, &tmp_size, &vars_size, scope);
+            tmp_size = 0;
+        }
+        | program 
         ;
 
 class_declarations : class_declaration ';' class_declarations 
                    | class_declaration ';'
                    ;
 
-class_declaration : CONST TIP ID ASSIGN exp 
-                  | TIP ID ASSIGN exp 
-                  | TIP ID 
+class_declaration : CONST TIP ID ASSIGN exp {
+                        types_arr_size = 0;
+                        var_name[0] = '\0';
+                        strcat(var_name, $3); 
+                        sprintf(var_type, "%s %s", $1, $2);
+                        insertVar(tmp_vars, &tmp_size, var_name, var_type, "", $5);
+
+                  }
+                  | TIP ID ASSIGN exp {
+                        types_arr_size = 0;
+                        var_name[0] = '\0';
+                        strcat(var_name, $2); 
+                        sprintf(var_type, "%s", $1);
+                        insertVar(tmp_vars, &tmp_size, var_name, var_type, "", $4);
+                  }
+                  | TIP ID {
+                        var_name[0] = '\0';
+                        strcat(var_name, $2); 
+                        sprintf(var_type, "%s", $1);
+                        result = malloc(sizeof(int)); 
+                        *((int*)result) = 0;
+                        insertVar(tmp_vars, &tmp_size, var_name, var_type, "", result);
+                  }
                   | TIP ID '(' ')'
                   | TIP ID '(' param_list ')'
-                  | CONST TIP ID brackets ASSIGN exp
-                  | TIP ID brackets
+                  | CONST TIP ID brackets {
+                        var_name[0] = '\0';
+                        strcat(var_name, $3); 
+                        sprintf(var_type, "%s %s[]", $1, $2);
+                        insertVar(tmp_vars, &tmp_size, var_name, var_type, "", "");
+                  }
+                  | TIP ID brackets {
+                        var_name[0] = '\0';
+                        strcat(var_name, $2); 
+                        sprintf(var_type, "%s[]", $1);
+                        insertVar(tmp_vars, &tmp_size, var_name, var_type, "", "");
+                  }
                   ;
 
-program : BGIN '(' ')' ':' statements END {printf("Program corect sintactic.\n");}
+program : BGIN '(' ')' ':' local_statements END {printf("Program corect sintactic.\n");}
         ;
 
-statements : statement statements 
-           | %empty
-           ;
+local_statements : local_statement local_statements {strcpy(scope, "main");}
+                 | %empty 
+                 ;
 
-statement : TIP ID ASSIGN exp ';'
-          | CONST TIP ID ASSIGN exp ';'
-          | ID ASSIGN exp ';'
-          | ID '(' ')' ';'
-          | ID '(' params ')' ';'
-          | ID '-' '>' ID ';'
-          | ID '-' '>' ID '(' ')' ';'
-          | ID '-' '>' ID '(' param ')' ';'
-          | IF '(' bexp ')' '{' statements '}' 
-          | WHILE_LOOP '(' bexp ')' '{' statements '}' 
-          | FOR_LOOP  '(' init ';' cond ';' increment ')' '{' statements '}' 
-          ;
+local_statement : TIP ID ASSIGN exp ';' {
+                    var_name[0] = '\0';
+                    printf("Scope: %s.\n", scope);
+                    insertVar(variables_table, &vars_size, $2, $1, scope, $4);
+                }
+                | CONST TIP ID ASSIGN exp ';' {
+                    var_name[0] = '\0';
+                    strcpy(var_name, $3);
+                    sprintf(var_type, "%s %s", $1, $2);
+                    insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                }
+                | ID ASSIGN exp ';'
+                | ID '[' INTEGER ']' ASSIGN exp ';'
+                | ID '[' ID ']' ASSIGN exp ';'
+                | ID '(' ')' ';'
+                | ID '(' params ')' ';'
+                | ID '-' '>' ID ';'
+                | ID '-' '>' ID '(' ')' ';'
+                | ID '-' '>' ID '(' param ')' ';'
+                | IF '(' bexp ')' '{' local_statements '}' 
+                | IF '(' bexp ')' '{' local_statements '}' ELSE '{' local_statements '}'
+                | WHILE_LOOP '(' bexp ')' '{' local_statements '}' 
+                | FOR_LOOP  '(' init ';' cond ';' increment ')' '{' local_statements '}' 
+                ;
 
-init : TIP ID ASSIGN
+init : TIP ID ASSIGN exp {
+        var_name[0] = '\0'; 
+        strcpy(var_name, $2);
+        sprintf(var_type, "%s", $1);
+        insertVar(variables_table, &vars_size, var_name, var_type, "main", $4);
+     }
      | %empty;
 
 cond : bexp 
@@ -604,19 +717,19 @@ aexp : aexp '+' aexp {
         $$ = result;
     }
     | ID {
-        if (strcmp(TypeOf($1), "undefined") == 0) {
+        if (strcmp(search_var($1, scope), "undefined") == 0) {
             sprintf(msg, "%s %s %s", "Variabila", $1, "nu este declarata");
             yyerror(msg); 
         }
         else {
-            strcpy(types_arr[types_arr_size++], TypeOf($1));
-            if (strcmp(TypeOf($1), "int") == 0) {
-                result = malloc(sizeof(int)); 
-                memcpy(result, Eval($1), sizeof(int)); 
+            strcpy(types_arr[types_arr_size++], search_var($1, scope));
+            if (strcmp(search_var($1, scope), "int") == 0) {
+                result = malloc(sizeof(int));
+                memcpy(result, get_value($1, search_var($1, scope), scope, variables_table, vars_size), sizeof(int));
             }
             else {
                 result = malloc(sizeof(float)); 
-                memcpy(result, Eval($1), sizeof(float)); 
+                memcpy(result, get_value($1, search_var($1, scope), scope, variables_table, vars_size), sizeof(float)); 
             }
             $$ = result;
         }

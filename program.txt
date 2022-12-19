@@ -1,25 +1,76 @@
-int a ::= 10 - 5; 
+int a ::= 10 * 10 - 5 ^ 2; 
 int x ::= 2; 
 string nume ::= "Stefan"; 
 char character ::= 'a';
-
 const char char_value ::= 'a';
+
+int arr[20] ::= {1, 2, 3, 4};
+const string string_arr[150] ::= {"Ana", "are", "mere", "pere", "si", "prune"};
+char char_arr[200] ::= {'a', 'b', 'c', 'd'};
+float lengths[1050] ::= {1.54, 19.75, -10.53, 11.69};
+bool test_arr[160] ::= {true, false, false};
 
 int f(); 
 int g(string str[100]); 
 
+int cmmdc(int a, int b) {
+    int p ::= a; 
+    int q ::= 20;
+    while (p != q) {
+        if (p > q) {
+            p ::= p - q;
+        }
+        else {
+            q ::= q - p; 
+        }
+    }
+}
+
+class Train {
+    int passengers; 
+    const int nr_of_trains ::= 100;
+    string company ::= "CFR Calatori";
+    int distances[1500];
+    const string passangers_data[5000];
+    char get_first_letter(string train_id);
+    string get_copmany();
+};
+
 begin_main():
     cmmdc(f(), cmmdc(2, 3));
-    Train->passangers; 
+
+    Train->passengers; 
     Train->get_company(); 
     Train->get_first_letter("1234"); 
 
+    int flush ::= -5;
+
     if (2 < 3) {
-       int sigma ::= 100 + 200; 
+       int sigma ::= (100 + 200 - 35) + 7^(a * x / 5) % 20; 
     }
 
     for ( ; ; ) {
         bool cond ::= (false && true) || (!true || !false);
+    }
+
+    int w ::= 145 / 10 + 17 ^ 2 - 22 % 8;
+    int y ::= 137 ^ 2 - 17 * 5 + 3 * 9 % 17;
+
+    const int z ::= y - x;
+
+    while (x + y < 100) {
+        x ::= x % (x - y);
+    }
+
+    int value ::= x % 100;
+    int lengths_size ::= 5;
+
+    for (int i ::= 0; i < lengths_size; i ::= i + 1) {
+        lengths[i] ::= value * 10; 
+        value ::= value + 1;
+        if (value > 150) {
+            value ::= value % 150;
+        }
     }
 
 end_main
