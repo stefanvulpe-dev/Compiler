@@ -59,19 +59,29 @@ global_variables : global_declaration ';' global_variables
 
 global_declaration : CONST TIP ID ASSIGN exp {
                         types_arr_size = 0;
-                        var_name[0] = '\0';
-                        strcpy(scope, "global");
-                        strcat(var_name, $3); 
-                        sprintf(var_type, "%s %s", $1, $2);
-                        insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                        if (strcmp(types_arr[0], $2) == 0) {
+                            var_name[0] = '\0';
+                            strcpy(scope, "global");
+                            strcat(var_name, $3); 
+                            sprintf(var_type, "%s %s", $1, $2);
+                            insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                        }
+                        else {
+                            yyerror("Tipuri de date incompatibile");
+                        }
                    }
                    | TIP ID ASSIGN exp {
                         types_arr_size = 0;
-                        var_name[0] = '\0';
-                        strcpy(scope, "global");
-                        strcat(var_name, $2); 
-                        sprintf(var_type, "%s", $1);
-                        insertVar(variables_table, &vars_size, var_name, var_type, scope, $4);
+                        if (strcmp(types_arr[0], $1) == 0) {
+                            var_name[0] = '\0';
+                            strcpy(scope, "global");
+                            strcat(var_name, $2); 
+                            sprintf(var_type, "%s", $1);
+                            insertVar(variables_table, &vars_size, var_name, var_type, scope, $4);
+                        }
+                        else {
+                            yyerror("Tipuri de date incompatibile");
+                        }
                    }
                    | CONST TIP ID brackets ASSIGN '{' initialization_list '}' {
                         init_list[0] = '\0';
@@ -103,12 +113,12 @@ global_declaration : CONST TIP ID ASSIGN exp {
 
 brackets : '[' INTEGER ']' brackets { 
             if ($2 < 0) {
-                yyerror("Eroare. Dimensiune negativa a array-ului");
+                yyerror("Dimensiune negativa a array-ului");
             } 
          }
          | '[' INTEGER ']' {
             if ($2 < 0) {
-                yyerror("Eroare. Dimensiune negativa a array-ului");
+                yyerror("Dimensiune negativa a array-ului");
             } 
          }
          ;
@@ -227,16 +237,36 @@ functions : function_declaration ';' functions
 
 function_declaration : TIP ID '(' ')'  { 
                         strcpy(scope, $2);
+                        insertFunction($1, $2, "");
+                        var_type[0] = '\0';
                      }
                      | TIP ID '(' param_list ')' { 
                         strcpy(scope, $2); 
+                        insertFunction($1, $2, strrev(var_type));
+                        var_type[0] = '\0';
                      }
                      ;
 
-param_list : TIP ID ',' param_list
-           | TIP ID brackets ',' param_list
-           | TIP ID
-           | TIP ID brackets
+param_list : TIP ID ',' param_list {
+                strcat(var_type, $1);
+                strcat(var_type, " ");
+           }
+           | TIP ID brackets ',' param_list {
+                char tmp[50];
+                sprintf(tmp, "%s[]", $1);
+                strcat(var_type, tmp);
+                strcat(var_type, " ");
+           }
+           | TIP ID {
+                strcat(var_type, $1);
+                strcat(var_type, " ");
+           }
+           | TIP ID brackets {
+                char tmp[50];
+                sprintf(tmp, "%s[]", $1);
+                strcat(var_type, tmp);
+                strcat(var_type, " ");
+           }
            ;
 
 function_statements : function_statement function_statements 
@@ -244,18 +274,35 @@ function_statements : function_statement function_statements
                     ;
 
 function_statement : TIP ID ASSIGN exp ';' {
+                        if (strcmp(types_arr[0], $1) == 0) {
                             var_name[0] = '\0';
                             insertVar(variables_table, &vars_size, $2, $1, scope, $4);
+                        }
+                        else {
+                            yyerror("Tipuri de date incompatibile");
+                        }
+                        types_arr_size = 0;
                     }
                     | CONST TIP ID ASSIGN exp ';' {
+                        if (strcmp(types_arr[0], $2) == 0) {
                             var_name[0] = '\0';
                             strcpy(var_name, $3);
                             sprintf(var_type, "%s %s", $1, $2);
                             insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                        }
+                        else {
+                            yyerror("Tipuri de date incompatibile");
+                        }
+                        types_arr_size = 0;
                     }
-                    | ID ASSIGN exp ';'
-                    | ID '[' INTEGER ']' ASSIGN exp ';'
-                    | ID '[' ID ']' ASSIGN exp ';'
+                    | ID ASSIGN exp ';' {
+                        if (strcmp(types_arr[0], search_var($1, scope)) != 0) {
+                            yyerror("Tipuri de date incompatibile");
+                        }
+                        types_arr_size = 0;
+                    }
+                    | ID '[' INTEGER ']' ASSIGN exp ';' {types_arr_size = 0;}
+                    | ID '[' ID ']' ASSIGN exp ';' {types_arr_size = 0;}
                     | ID '(' ')' ';'
                     | ID '(' params ')' ';'
                     | ID '-' '>' ID ';'
@@ -280,19 +327,28 @@ class_declarations : class_declaration ';' class_declarations
                    ;
 
 class_declaration : CONST TIP ID ASSIGN exp {
+                        if (strcmp(types_arr[0], $2) == 0) {
+                            var_name[0] = '\0';
+                            strcat(var_name, $3); 
+                            sprintf(var_type, "%s %s", $1, $2);
+                            insertVar(tmp_vars, &tmp_size, var_name, var_type, "", $5);
+                        }
+                        else {
+                            yyerror("Tipuri de date incompatibile");
+                        }
                         types_arr_size = 0;
-                        var_name[0] = '\0';
-                        strcat(var_name, $3); 
-                        sprintf(var_type, "%s %s", $1, $2);
-                        insertVar(tmp_vars, &tmp_size, var_name, var_type, "", $5);
-
                   }
                   | TIP ID ASSIGN exp {
+                        if (strcmp(types_arr[0], $1) == 0) {
+                            var_name[0] = '\0';
+                            strcat(var_name, $2); 
+                            sprintf(var_type, "%s", $1);
+                            insertVar(tmp_vars, &tmp_size, var_name, var_type, "", $4);
+                        }
+                        else {
+                            yyerror("Tipuri de date incompatibile");
+                        }
                         types_arr_size = 0;
-                        var_name[0] = '\0';
-                        strcat(var_name, $2); 
-                        sprintf(var_type, "%s", $1);
-                        insertVar(tmp_vars, &tmp_size, var_name, var_type, "", $4);
                   }
                   | TIP ID {
                         var_name[0] = '\0';
@@ -321,24 +377,53 @@ class_declaration : CONST TIP ID ASSIGN exp {
 program : BGIN '(' ')' ':' local_statements END {printf("Program corect sintactic.\n");}
         ;
 
-local_statements : local_statement local_statements {strcpy(scope, "main");}
+local_statements : local_statement local_statements 
                  | %empty 
                  ;
 
 local_statement : TIP ID ASSIGN exp ';' {
-                    var_name[0] = '\0';
-                    printf("Scope: %s.\n", scope);
-                    insertVar(variables_table, &vars_size, $2, $1, scope, $4);
+                    if (strcmp(types_arr[0], $1) == 0) {
+                        var_name[0] = '\0';
+                        strcpy(scope, "main");
+                        insertVar(variables_table, &vars_size, $2, $1, scope, $4);
+                    }
+                    else {
+                        yyerror("Tipuri de date incompatibile");
+                    }
+                    types_arr_size = 0;
                 }
                 | CONST TIP ID ASSIGN exp ';' {
-                    var_name[0] = '\0';
-                    strcpy(var_name, $3);
-                    sprintf(var_type, "%s %s", $1, $2);
-                    insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                    if (strcmp(types_arr[0], $2) == 0) {
+                        var_name[0] = '\0';
+                        strcpy(scope, "main");
+                        strcpy(var_name, $3);
+                        sprintf(var_type, "%s %s", $1, $2);
+                        insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                    }
+                    else {
+                        yyerror("Tipuri de date incompatibile");
+                    }
+                    types_arr_size = 0;
                 }
-                | ID ASSIGN exp ';'
-                | ID '[' INTEGER ']' ASSIGN exp ';'
-                | ID '[' ID ']' ASSIGN exp ';'
+                | ID ASSIGN exp ';' {
+                    if (strcmp(types_arr[0], search_var($1, scope)) != 0) {
+                        yyerror("Tipuri de date incompatibile");
+                    }
+                    types_arr_size = 0;
+                }
+                | ID '[' INTEGER ']' ASSIGN exp ';' {
+                    if ($3 < 0) {
+                        yyerror("Index negativ al array-ului");
+                    }
+                    types_arr_size = 0;
+                }
+                | ID '[' ID ']' ASSIGN exp ';' {
+                    strcpy(scope, "main");
+                    if (get_value($3, search_var($3, scope), scope, variables_table, vars_size) == NULL) {
+                        yyerror("Index gresit");
+                    }
+                    types_arr_size = 0;
+                }
                 | ID '(' ')' ';'
                 | ID '(' params ')' ';'
                 | ID '-' '>' ID ';'
@@ -351,10 +436,16 @@ local_statement : TIP ID ASSIGN exp ';' {
                 ;
 
 init : TIP ID ASSIGN exp {
-        var_name[0] = '\0'; 
-        strcpy(var_name, $2);
-        sprintf(var_type, "%s", $1);
-        insertVar(variables_table, &vars_size, var_name, var_type, "main", $4);
+        if (strcmp(types_arr[0], $1) == 0) {
+            var_name[0] = '\0'; 
+            strcpy(var_name, $2);
+            sprintf(var_type, "%s", $1);
+            insertVar(variables_table, &vars_size, var_name, var_type, "main", $4);
+        }
+        else {
+            yyerror("Tipuri de date incompatibile");
+        }
+        types_arr_size = 0;
      }
      | %empty;
 
@@ -362,7 +453,7 @@ cond : bexp
      | %empty
      ;
 
-increment : ID ASSIGN exp
+increment : ID ASSIGN exp {types_arr_size = 0;}
           | %empty
           ;
 
@@ -372,7 +463,7 @@ params : param ',' params
 
 param : ID '(' ')'
       | ID '(' params ')'
-      | exp
+      | exp {types_arr_size = 0;}
       ;
 
 exp : aexp {
@@ -405,6 +496,7 @@ exp : aexp {
         $$ = result;
     }
     | CHAR {
+        strcpy(types_arr[0], "char");
         printf("S-a recunoscut caracterul %c.\n", $1);
         character = $1; 
         result = (void*)(malloc(sizeof(char))); 
@@ -415,7 +507,7 @@ exp : aexp {
         
 aexp : aexp '+' aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -437,7 +529,7 @@ aexp : aexp '+' aexp {
     }
     | '(' aexp '+' aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -459,7 +551,7 @@ aexp : aexp '+' aexp {
     }
     | aexp '-' aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -481,7 +573,7 @@ aexp : aexp '+' aexp {
     }
     | '(' aexp '-' aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -503,7 +595,7 @@ aexp : aexp '+' aexp {
     }
     | aexp '*' aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -526,7 +618,7 @@ aexp : aexp '+' aexp {
     }
     | '('aexp '*' aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -548,7 +640,7 @@ aexp : aexp '+' aexp {
     }
     | aexp '/' aexp {
          if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -561,7 +653,7 @@ aexp : aexp '+' aexp {
                     $$ = result;
                 }
                 else {
-                    yyerror("Eroare. Impartire la 0");
+                    yyerror("Impartire la 0");
                 }
             }
             else {
@@ -574,14 +666,14 @@ aexp : aexp '+' aexp {
                     $$ = result;
                 }
                 else {
-                    yyerror("Eroare, impartire la 0");  
+                    yyerror("Impartire la 0");  
                 }
             }
         }
     }
     | '('aexp '/' aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -594,7 +686,7 @@ aexp : aexp '+' aexp {
                     $$ = result;
                 }
                 else {
-                    yyerror("Eroare. Impartire la 0"); 
+                    yyerror("Impartire la 0"); 
                 }
             }
             else {
@@ -607,14 +699,14 @@ aexp : aexp '+' aexp {
                     $$ = result;
                 }
                 else {
-                    yyerror("Eroare, impartire la 0");  
+                    yyerror("Impartire la 0");  
                 }
             }
         }
     }
     | aexp '%' aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -637,7 +729,7 @@ aexp : aexp '+' aexp {
     }
     | '(' aexp '%' aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -660,7 +752,7 @@ aexp : aexp '+' aexp {
     }
     | aexp '^' aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -682,7 +774,7 @@ aexp : aexp '+' aexp {
     }
     | '('aexp '^' aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -738,7 +830,7 @@ aexp : aexp '+' aexp {
 
 bexp : aexp '<' aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -755,7 +847,7 @@ bexp : aexp '<' aexp {
      }
      | '('aexp '<' aexp ')'{
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -772,7 +864,7 @@ bexp : aexp '<' aexp {
      }
      | aexp '>' aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -789,7 +881,7 @@ bexp : aexp '<' aexp {
     }
      | '('aexp '>' aexp ')'{
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -806,7 +898,7 @@ bexp : aexp '<' aexp {
      }
      | aexp LTE aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -823,7 +915,7 @@ bexp : aexp '<' aexp {
      }
      | '(' aexp LTE aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -840,7 +932,7 @@ bexp : aexp '<' aexp {
      }
      | aexp GTE aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -857,7 +949,7 @@ bexp : aexp '<' aexp {
      }
      | '(' aexp GTE aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -874,7 +966,7 @@ bexp : aexp '<' aexp {
      }
      | aexp EQ aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -891,7 +983,7 @@ bexp : aexp '<' aexp {
      }
      | '(' aexp EQ aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -908,7 +1000,7 @@ bexp : aexp '<' aexp {
      }
      | aexp NEQ aexp {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -925,7 +1017,7 @@ bexp : aexp '<' aexp {
      }
      | '(' aexp NEQ aexp ')' {
         if (!checkTypes()) {
-            yyerror("Eroare. Operanzii din expresie nu au acelasi tip");
+            yyerror("Operanzii din expresie nu au acelasi tip");
         }
         else {
             if (strcmp(types_arr[0], "int") == 0) {
@@ -949,7 +1041,10 @@ bexp : aexp '<' aexp {
      | bexp NEQ bexp {$$ = ($1 != $3);}
      | '(' bexp NEQ bexp ')' {$$ = ($2 != $4);}
      | '!' bexp {$$ = (!$2);}
-     | BOOLEAN {$$ = $1;}
+     | BOOLEAN {
+        strcpy(types_arr[0], "bool");
+        $$ = $1;
+    }
      ;
 
 str : str '+' str {
@@ -970,6 +1065,9 @@ str : str '+' str {
                 $$ = s;
             }
         }  
+        else {
+            yyerror("Exponentul nu este de tip intreg");
+        }
 
     }
     | str '%' str {
@@ -985,7 +1083,10 @@ str : str '+' str {
         strcat(aux, "\0");
         $$ = aux;
     }
-    | STRING  {$$ = strdup($1);}
+    | STRING  {
+        strcpy(types_arr[0], "string");
+        $$ = strdup($1);
+    }
     ;
 %%
 
@@ -993,10 +1094,14 @@ int main(int argc, char** argv) {
     yyin = fopen(argv[1], "r");
 
     FILE* fptr_vars = fopen(argv[2], "w");
-
+    FILE* fptr_fct = fopen(argv[3], "w");
     yyparse();
 
     print_symbol_table(fptr_vars);
 
+    print_functions_table(fptr_fct);
+
     fclose(fptr_vars);
+
+    fclose(fptr_fct);
 } 

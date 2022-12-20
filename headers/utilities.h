@@ -31,10 +31,17 @@ int functions_size = 0;
 
 char* search_var(char* name, char* scope) {
     for (int i = 0; i < vars_size; ++i) {
-        if ((strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].scope, scope) == 0) || (strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].scope, "global") == 0)) {
+        if ((strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].scope, scope) == 0)) {
             return variables_table[i].type;
         }
     }
+
+    for (int i = 0; i < vars_size; ++i) {
+        if (strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].scope, "global") == 0) {
+            return variables_table[i].type;
+        }
+    }
+
     char msg[100];
     sprintf(msg, "%s %s %s", "Variabila", name, "nu exista");
     yyerror(msg);
@@ -82,11 +89,6 @@ void print_table() {
     }
 }
 
-void yyerror(char * s) {
-    printf("eroare: %s, la linia %d.\n", s, yylineno);
-    exit(0);
-}
-
 void print_symbol_table(FILE* fptr) {
     fprintf(fptr, "Name::scope  --->  <Type>  [Value]\n");
     fprintf(fptr, "-------------------------------------------------------------------------------------------------------------\n");
@@ -122,6 +124,31 @@ bool checkTypes() {
     return true;
 }
 
+int insertFunction(char* returned_type, char* name, char* parameters) {
+    for (int i = 0; i < functions_size; ++i) {
+        if (strcmp(functions_table[i].returned_type, returned_type) == 0 && strcmp(functions_table[i].name, name) == 0 && strcmp(functions_table[i].parameters, parameters) == 0) {
+            char msg[100]; 
+            sprintf(msg, "%s %s %s %s %s", "Functia", name, "cu parametrii", parameters, "exista deja");
+            yyerror(msg);
+            return -1;
+        }
+    }
+    functions_table[functions_size].returned_type = strdup(returned_type);
+    functions_table[functions_size].name = strdup(name); 
+    functions_table[functions_size].parameters = strdup(parameters); 
+    functions_size ++;
+}
+
+void print_functions_table(FILE* fptr) {
+    fprintf(fptr, "Name  --->   < returned-type >   { parameters }\n");
+    fprintf(fptr, "----------------------------------------------------------------------------------\n");
+    
+    for (int i = 0; i < functions_size; ++i) {
+        fprintf(fptr, "%s   <%s>   [%s]\n", functions_table[i].name, functions_table[i].returned_type, functions_table[i].parameters);
+        fprintf(fptr, "----------------------------------------------------------------------------------\n");
+    }
+}
+
 char *strrev(char *str) {
     char *p, *new_str;
     char words[256][236];
@@ -149,4 +176,9 @@ char *strrev(char *str) {
     new_str[strlen(new_str) - 1] = '\0';
 
     return new_str;
+}
+
+void yyerror(char * s) {
+    printf("eroare: %s, la linia %d.\n", s, yylineno);
+    exit(0);
 }

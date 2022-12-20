@@ -26,6 +26,17 @@ int cmmdc(int a, int b) {
     }
 }
 
+float compute_volume(float base, float height) {
+    float estimated_volume ::= 1000.0;
+    float a ::= 0.0; 
+    float b ::= 0.5;
+    while (estimated_volume > 0.0 && (a + b) < estimated_volume) {
+        estimated_volume ::= estimated_volume - 0.05;
+        a ::= a * 10.0;
+        b ::= b + a;
+    }
+}
+
 class Train {
     int passengers; 
     const int nr_of_trains ::= 100;
@@ -46,7 +57,7 @@ begin_main():
     int flush ::= -5;
 
     if (2 < 3) {
-       int sigma ::= (100 + 200 - 35) + 7^(a * x / 5) % 20; 
+       int sigma ::= (100 + 200 - 35) + 7 ^ (a * x / 5) % 20; 
     }
 
     for ( ; ; ) {
@@ -60,6 +71,14 @@ begin_main():
 
     while (x + y < 100) {
         x ::= x % (x - y);
+        x ::= x + 1; 
+        y ::= x / (y * 5);
+        if (y != 0 && x > (y + 5)) {
+            y ::= y - 1;
+        }
+        else {
+            x ::= x * 5;
+        }
     }
 
     int value ::= x % 100;
@@ -72,7 +91,6 @@ begin_main():
             value ::= value % 150;
         }
     }
-
 end_main
 
 
