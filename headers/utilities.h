@@ -35,7 +35,6 @@ char* search_var(char* name, char* scope) {
             return variables_table[i].type;
         }
     }
-
     for (int i = 0; i < vars_size; ++i) {
         if (strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].scope, "global") == 0) {
             return variables_table[i].type;
@@ -144,7 +143,7 @@ void print_functions_table(FILE* fptr) {
     fprintf(fptr, "----------------------------------------------------------------------------------\n");
     
     for (int i = 0; i < functions_size; ++i) {
-        fprintf(fptr, "%s   <%s>   [%s]\n", functions_table[i].name, functions_table[i].returned_type, functions_table[i].parameters);
+        fprintf(fptr, "%s   <%s>   {%s}\n", functions_table[i].name, functions_table[i].returned_type, functions_table[i].parameters);
         fprintf(fptr, "----------------------------------------------------------------------------------\n");
     }
 }

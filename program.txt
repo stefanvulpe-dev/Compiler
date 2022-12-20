@@ -55,6 +55,7 @@ begin_main():
     Train->get_first_letter("1234"); 
 
     int flush ::= -5;
+    bool cond11 ::= 1 < 2;
 
     if (2 < 3) {
        int sigma ::= (100 + 200 - 35) + 7 ^ (a * x / 5) % 20; 
@@ -81,14 +82,14 @@ begin_main():
         }
     }
 
-    int value ::= x % 100;
+    float value ::= 5.0;
     int lengths_size ::= 5;
 
     for (int i ::= 0; i < lengths_size; i ::= i + 1) {
-        lengths[i] ::= value * 10; 
-        value ::= value + 1;
-        if (value > 150) {
-            value ::= value % 150;
+        lengths[i] ::= value * 10.0; 
+        value ::= value + 1.0;
+        if (value > 150.0) {
+            value ::= value - 150.0;
         }
     }
 end_main

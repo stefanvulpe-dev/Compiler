@@ -574,20 +574,20 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    57,    57,    58,    60,    73,    86,    99,   114,   119,
-     126,   130,   134,   138,   142,   148,   155,   165,   172,   182,
-     189,   199,   206,   216,   223,   233,   234,   235,   238,   243,
-     250,   254,   260,   264,   272,   273,   276,   286,   298,   304,
-     305,   306,   307,   308,   309,   310,   311,   312,   313,   314,
-     317,   322,   325,   326,   329,   341,   353,   361,   362,   363,
-     369,   377,   380,   381,   384,   395,   408,   414,   420,   427,
-     428,   429,   430,   431,   432,   433,   434,   435,   438,   450,
-     452,   453,   456,   457,   460,   461,   464,   465,   466,   469,
-     484,   491,   498,   508,   530,   552,   574,   596,   619,   641,
-     674,   707,   730,   753,   775,   797,   804,   811,   831,   848,
-     865,   882,   899,   916,   933,   950,   967,   984,  1001,  1018,
-    1035,  1036,  1037,  1038,  1039,  1040,  1041,  1042,  1043,  1044,
-    1050,  1055,  1073,  1086
+       0,    57,    57,    58,    61,    74,    87,   100,   115,   120,
+     127,   131,   135,   139,   143,   149,   156,   166,   173,   183,
+     190,   200,   207,   217,   224,   234,   235,   236,   239,   244,
+     251,   255,   261,   265,   273,   274,   277,   287,   299,   305,
+     314,   326,   327,   328,   329,   330,   331,   332,   333,   334,
+     337,   342,   345,   346,   349,   361,   373,   381,   382,   383,
+     389,   397,   400,   401,   404,   415,   428,   434,   443,   456,
+     457,   458,   459,   460,   461,   462,   463,   464,   467,   479,
+     481,   482,   485,   486,   489,   490,   493,   494,   495,   498,
+     513,   521,   529,   539,   561,   583,   605,   627,   650,   672,
+     705,   738,   761,   784,   806,   828,   835,   842,   862,   879,
+     896,   913,   930,   947,   964,   981,   998,  1015,  1032,  1049,
+    1066,  1067,  1068,  1069,  1070,  1071,  1072,  1073,  1074,  1075,
+    1078,  1083,  1101,  1114
 };
 #endif
 
@@ -1396,7 +1396,7 @@ yyreduce:
   switch (yyn)
     {
   case 4: /* global_declaration: CONST TIP ID ASSIGN exp  */
-#line 60 "my_language.y"
+#line 61 "my_language.y"
                                              {
                         types_arr_size = 0;
                         if (strcmp(types_arr[0], (yyvsp[-3].str_value)) == 0) {
@@ -1414,7 +1414,7 @@ yyreduce:
     break;
 
   case 5: /* global_declaration: TIP ID ASSIGN exp  */
-#line 73 "my_language.y"
+#line 74 "my_language.y"
                                        {
                         types_arr_size = 0;
                         if (strcmp(types_arr[0], (yyvsp[-3].str_value)) == 0) {
@@ -1432,7 +1432,7 @@ yyreduce:
     break;
 
   case 6: /* global_declaration: CONST TIP ID brackets ASSIGN '{' initialization_list '}'  */
-#line 86 "my_language.y"
+#line 87 "my_language.y"
                                                                               {
                         init_list[0] = '\0';
                         var_name[0] = '\0';
@@ -1450,7 +1450,7 @@ yyreduce:
     break;
 
   case 7: /* global_declaration: TIP ID brackets ASSIGN '{' initialization_list '}'  */
-#line 99 "my_language.y"
+#line 100 "my_language.y"
                                                                         {
                         init_list[0] = '\0';
                         var_name[0] = '\0';
@@ -1468,7 +1468,7 @@ yyreduce:
     break;
 
   case 8: /* brackets: '[' INTEGER ']' brackets  */
-#line 114 "my_language.y"
+#line 115 "my_language.y"
                                     { 
             if ((yyvsp[-2].int_value) < 0) {
                 yyerror("Dimensiune negativa a array-ului");
@@ -1478,7 +1478,7 @@ yyreduce:
     break;
 
   case 9: /* brackets: '[' INTEGER ']'  */
-#line 119 "my_language.y"
+#line 120 "my_language.y"
                            {
             if ((yyvsp[-1].int_value) < 0) {
                 yyerror("Dimensiune negativa a array-ului");
@@ -1488,7 +1488,7 @@ yyreduce:
     break;
 
   case 10: /* initialization_list: initialization_list_int  */
-#line 126 "my_language.y"
+#line 127 "my_language.y"
                                               {
                         strcpy(arr_type, "int");
                         (yyval.str_value) = strrev((yyvsp[0].str_value));
@@ -1497,7 +1497,7 @@ yyreduce:
     break;
 
   case 11: /* initialization_list: initialization_list_float  */
-#line 130 "my_language.y"
+#line 131 "my_language.y"
                                                 {
                         strcpy(arr_type, "float");
                         (yyval.str_value) = strrev((yyvsp[0].str_value));
@@ -1506,7 +1506,7 @@ yyreduce:
     break;
 
   case 12: /* initialization_list: initialization_list_bool  */
-#line 134 "my_language.y"
+#line 135 "my_language.y"
                                                {
                         strcpy(arr_type, "bool");
                         (yyval.str_value) = strrev((yyvsp[0].str_value));
@@ -1515,7 +1515,7 @@ yyreduce:
     break;
 
   case 13: /* initialization_list: initialization_list_char  */
-#line 138 "my_language.y"
+#line 139 "my_language.y"
                                                {
                         strcpy(arr_type, "char");
                         (yyval.str_value) = strrev((yyvsp[0].str_value));
@@ -1524,7 +1524,7 @@ yyreduce:
     break;
 
   case 14: /* initialization_list: initialization_list_string  */
-#line 142 "my_language.y"
+#line 143 "my_language.y"
                                                  {
                         strcpy(arr_type, "string");
                         (yyval.str_value) = strrev((yyvsp[0].str_value));
@@ -1533,7 +1533,7 @@ yyreduce:
     break;
 
   case 15: /* initialization_list_int: INTEGER ',' initialization_list_int  */
-#line 148 "my_language.y"
+#line 149 "my_language.y"
                                                               {
                             element[0] = '\0';
                             sprintf(element, "%d", (yyvsp[-2].int_value)); 
@@ -1545,7 +1545,7 @@ yyreduce:
     break;
 
   case 16: /* initialization_list_int: INTEGER  */
-#line 155 "my_language.y"
+#line 156 "my_language.y"
                                   {
                             element[0] = '\0';
                             sprintf(element, "%d", (yyvsp[0].int_value));
@@ -1558,7 +1558,7 @@ yyreduce:
     break;
 
   case 17: /* initialization_list_float: FLOAT ',' initialization_list_float  */
-#line 165 "my_language.y"
+#line 166 "my_language.y"
                                                                 {
                             element[0] = '\0';
                             sprintf(element, "%f", (yyvsp[-2].float_value)); 
@@ -1570,7 +1570,7 @@ yyreduce:
     break;
 
   case 18: /* initialization_list_float: FLOAT  */
-#line 172 "my_language.y"
+#line 173 "my_language.y"
                                   {
                             element[0] = '\0';
                             sprintf(element, "%f", (yyvsp[0].float_value));
@@ -1583,7 +1583,7 @@ yyreduce:
     break;
 
   case 19: /* initialization_list_bool: BOOLEAN ',' initialization_list_bool  */
-#line 182 "my_language.y"
+#line 183 "my_language.y"
                                                                 {
                             element[0] = '\0';
                             sprintf(element, "%s", (yyvsp[-2].boolean_value) ? "true" : "false");
@@ -1595,7 +1595,7 @@ yyreduce:
     break;
 
   case 20: /* initialization_list_bool: BOOLEAN  */
-#line 189 "my_language.y"
+#line 190 "my_language.y"
                                   {
                             element[0] = '\0';
                             sprintf(element, "%s", (yyvsp[0].boolean_value) ? "true" : "false");
@@ -1608,7 +1608,7 @@ yyreduce:
     break;
 
   case 21: /* initialization_list_char: CHAR ',' initialization_list_char  */
-#line 199 "my_language.y"
+#line 200 "my_language.y"
                                                              {
                             element[0] = '\0';
                             sprintf(element, "%c", (yyvsp[-2].char_value)); 
@@ -1620,7 +1620,7 @@ yyreduce:
     break;
 
   case 22: /* initialization_list_char: CHAR  */
-#line 206 "my_language.y"
+#line 207 "my_language.y"
                                {
                             element[0] = '\0';
                             sprintf(element, "%c", (yyvsp[0].char_value));
@@ -1633,7 +1633,7 @@ yyreduce:
     break;
 
   case 23: /* initialization_list_string: STRING ',' initialization_list_string  */
-#line 216 "my_language.y"
+#line 217 "my_language.y"
                                                                    {
                                 element[0] = '\0';
                                 sprintf(element, "%s", (yyvsp[-2].str_value));
@@ -1645,7 +1645,7 @@ yyreduce:
     break;
 
   case 24: /* initialization_list_string: STRING  */
-#line 223 "my_language.y"
+#line 224 "my_language.y"
                                      {
                                 element[0] = '\0';
                                 sprintf(element, "%s", (yyvsp[0].str_value));
@@ -1658,7 +1658,7 @@ yyreduce:
     break;
 
   case 28: /* function_declaration: TIP ID '(' ')'  */
-#line 238 "my_language.y"
+#line 239 "my_language.y"
                                        { 
                         strcpy(scope, (yyvsp[-2].str_value));
                         insertFunction((yyvsp[-3].str_value), (yyvsp[-2].str_value), "");
@@ -1668,7 +1668,7 @@ yyreduce:
     break;
 
   case 29: /* function_declaration: TIP ID '(' param_list ')'  */
-#line 243 "my_language.y"
+#line 244 "my_language.y"
                                                  { 
                         strcpy(scope, (yyvsp[-3].str_value)); 
                         insertFunction((yyvsp[-4].str_value), (yyvsp[-3].str_value), strrev(var_type));
@@ -1678,7 +1678,7 @@ yyreduce:
     break;
 
   case 30: /* param_list: TIP ID ',' param_list  */
-#line 250 "my_language.y"
+#line 251 "my_language.y"
                                    {
                 strcat(var_type, (yyvsp[-3].str_value));
                 strcat(var_type, " ");
@@ -1687,7 +1687,7 @@ yyreduce:
     break;
 
   case 31: /* param_list: TIP ID brackets ',' param_list  */
-#line 254 "my_language.y"
+#line 255 "my_language.y"
                                             {
                 char tmp[50];
                 sprintf(tmp, "%s[]", (yyvsp[-4].str_value));
@@ -1698,7 +1698,7 @@ yyreduce:
     break;
 
   case 32: /* param_list: TIP ID  */
-#line 260 "my_language.y"
+#line 261 "my_language.y"
                     {
                 strcat(var_type, (yyvsp[-1].str_value));
                 strcat(var_type, " ");
@@ -1707,7 +1707,7 @@ yyreduce:
     break;
 
   case 33: /* param_list: TIP ID brackets  */
-#line 264 "my_language.y"
+#line 265 "my_language.y"
                              {
                 char tmp[50];
                 sprintf(tmp, "%s[]", (yyvsp[-2].str_value));
@@ -1718,7 +1718,7 @@ yyreduce:
     break;
 
   case 36: /* function_statement: TIP ID ASSIGN exp ';'  */
-#line 276 "my_language.y"
+#line 277 "my_language.y"
                                            {
                         if (strcmp(types_arr[0], (yyvsp[-4].str_value)) == 0) {
                             var_name[0] = '\0';
@@ -1733,7 +1733,7 @@ yyreduce:
     break;
 
   case 37: /* function_statement: CONST TIP ID ASSIGN exp ';'  */
-#line 286 "my_language.y"
+#line 287 "my_language.y"
                                                   {
                         if (strcmp(types_arr[0], (yyvsp[-4].str_value)) == 0) {
                             var_name[0] = '\0';
@@ -1750,7 +1750,7 @@ yyreduce:
     break;
 
   case 38: /* function_statement: ID ASSIGN exp ';'  */
-#line 298 "my_language.y"
+#line 299 "my_language.y"
                                         {
                         if (strcmp(types_arr[0], search_var((yyvsp[-3].str_value), scope)) != 0) {
                             yyerror("Tipuri de date incompatibile");
@@ -1761,29 +1761,48 @@ yyreduce:
     break;
 
   case 39: /* function_statement: ID '[' INTEGER ']' ASSIGN exp ';'  */
-#line 304 "my_language.y"
-                                                        {types_arr_size = 0;}
-#line 1767 "./headers/my_language.tab.c"
+#line 305 "my_language.y"
+                                                        {
+                        if ((yyvsp[-4].int_value) < 0) {
+                            yyerror("Index negativ");
+                        }
+                        if (strstr(search_var((yyvsp[-6].str_value), scope), types_arr[0]) == NULL) {
+                            yyerror("Tipuri incompatibile");
+                        }
+                        types_arr_size = 0;
+                    }
+#line 1775 "./headers/my_language.tab.c"
     break;
 
   case 40: /* function_statement: ID '[' ID ']' ASSIGN exp ';'  */
-#line 305 "my_language.y"
-                                                   {types_arr_size = 0;}
-#line 1773 "./headers/my_language.tab.c"
+#line 314 "my_language.y"
+                                                   {
+                        if (strstr(search_var((yyvsp[-4].str_value), scope), "int") == NULL) {
+                            yyerror("Index gresit");
+                        } 
+                        if (strstr(search_var((yyvsp[-4].str_value), scope), "int") && *((int*)get_value((yyvsp[-4].str_value), "int", scope, variables_table, vars_size)) < 0) {
+                            yyerror("Index gresit");
+                        } 
+                        if (strstr(search_var((yyvsp[-6].str_value), scope), types_arr[0]) == NULL) {
+                            yyerror("Tipuri incompatibile");
+                        }
+                        types_arr_size = 0;
+                    }
+#line 1792 "./headers/my_language.tab.c"
     break;
 
   case 50: /* classes: CLASS ID '{' class_declarations '}' ';' classes  */
-#line 317 "my_language.y"
+#line 337 "my_language.y"
                                                           { 
             strcpy(scope, (yyvsp[-5].str_value)); 
             update_table(tmp_vars, variables_table, &tmp_size, &vars_size, scope);
             tmp_size = 0;
         }
-#line 1783 "./headers/my_language.tab.c"
+#line 1802 "./headers/my_language.tab.c"
     break;
 
   case 54: /* class_declaration: CONST TIP ID ASSIGN exp  */
-#line 329 "my_language.y"
+#line 349 "my_language.y"
                                             {
                         if (strcmp(types_arr[0], (yyvsp[-3].str_value)) == 0) {
                             var_name[0] = '\0';
@@ -1796,11 +1815,11 @@ yyreduce:
                         }
                         types_arr_size = 0;
                   }
-#line 1800 "./headers/my_language.tab.c"
+#line 1819 "./headers/my_language.tab.c"
     break;
 
   case 55: /* class_declaration: TIP ID ASSIGN exp  */
-#line 341 "my_language.y"
+#line 361 "my_language.y"
                                       {
                         if (strcmp(types_arr[0], (yyvsp[-3].str_value)) == 0) {
                             var_name[0] = '\0';
@@ -1813,11 +1832,11 @@ yyreduce:
                         }
                         types_arr_size = 0;
                   }
-#line 1817 "./headers/my_language.tab.c"
+#line 1836 "./headers/my_language.tab.c"
     break;
 
   case 56: /* class_declaration: TIP ID  */
-#line 353 "my_language.y"
+#line 373 "my_language.y"
                            {
                         var_name[0] = '\0';
                         strcat(var_name, (yyvsp[0].str_value)); 
@@ -1826,39 +1845,39 @@ yyreduce:
                         *((int*)result) = 0;
                         insertVar(tmp_vars, &tmp_size, var_name, var_type, "", result);
                   }
-#line 1830 "./headers/my_language.tab.c"
+#line 1849 "./headers/my_language.tab.c"
     break;
 
   case 59: /* class_declaration: CONST TIP ID brackets  */
-#line 363 "my_language.y"
+#line 383 "my_language.y"
                                           {
                         var_name[0] = '\0';
                         strcat(var_name, (yyvsp[-1].str_value)); 
                         sprintf(var_type, "%s %s[]", (yyvsp[-3].str_value), (yyvsp[-2].str_value));
                         insertVar(tmp_vars, &tmp_size, var_name, var_type, "", "");
                   }
-#line 1841 "./headers/my_language.tab.c"
+#line 1860 "./headers/my_language.tab.c"
     break;
 
   case 60: /* class_declaration: TIP ID brackets  */
-#line 369 "my_language.y"
+#line 389 "my_language.y"
                                     {
                         var_name[0] = '\0';
                         strcat(var_name, (yyvsp[-1].str_value)); 
                         sprintf(var_type, "%s[]", (yyvsp[-2].str_value));
                         insertVar(tmp_vars, &tmp_size, var_name, var_type, "", "");
                   }
-#line 1852 "./headers/my_language.tab.c"
+#line 1871 "./headers/my_language.tab.c"
     break;
 
   case 61: /* program: BGIN '(' ')' ':' local_statements END  */
-#line 377 "my_language.y"
+#line 397 "my_language.y"
                                                 {printf("Program corect sintactic.\n");}
-#line 1858 "./headers/my_language.tab.c"
+#line 1877 "./headers/my_language.tab.c"
     break;
 
   case 64: /* local_statement: TIP ID ASSIGN exp ';'  */
-#line 384 "my_language.y"
+#line 404 "my_language.y"
                                         {
                     if (strcmp(types_arr[0], (yyvsp[-4].str_value)) == 0) {
                         var_name[0] = '\0';
@@ -1870,11 +1889,11 @@ yyreduce:
                     }
                     types_arr_size = 0;
                 }
-#line 1874 "./headers/my_language.tab.c"
+#line 1893 "./headers/my_language.tab.c"
     break;
 
   case 65: /* local_statement: CONST TIP ID ASSIGN exp ';'  */
-#line 395 "my_language.y"
+#line 415 "my_language.y"
                                               {
                     if (strcmp(types_arr[0], (yyvsp[-4].str_value)) == 0) {
                         var_name[0] = '\0';
@@ -1888,45 +1907,54 @@ yyreduce:
                     }
                     types_arr_size = 0;
                 }
-#line 1892 "./headers/my_language.tab.c"
+#line 1911 "./headers/my_language.tab.c"
     break;
 
   case 66: /* local_statement: ID ASSIGN exp ';'  */
-#line 408 "my_language.y"
+#line 428 "my_language.y"
                                     {
                     if (strcmp(types_arr[0], search_var((yyvsp[-3].str_value), scope)) != 0) {
                         yyerror("Tipuri de date incompatibile");
                     }
                     types_arr_size = 0;
                 }
-#line 1903 "./headers/my_language.tab.c"
+#line 1922 "./headers/my_language.tab.c"
     break;
 
   case 67: /* local_statement: ID '[' INTEGER ']' ASSIGN exp ';'  */
-#line 414 "my_language.y"
+#line 434 "my_language.y"
                                                     {
                     if ((yyvsp[-4].int_value) < 0) {
                         yyerror("Index negativ al array-ului");
                     }
-                    types_arr_size = 0;
-                }
-#line 1914 "./headers/my_language.tab.c"
-    break;
-
-  case 68: /* local_statement: ID '[' ID ']' ASSIGN exp ';'  */
-#line 420 "my_language.y"
-                                               {
-                    strcpy(scope, "main");
-                    if (get_value((yyvsp[-4].str_value), search_var((yyvsp[-4].str_value), scope), scope, variables_table, vars_size) == NULL) {
-                        yyerror("Index gresit");
+                    if (strstr(search_var((yyvsp[-6].str_value), scope), types_arr[0]) == NULL) {
+                        yyerror("Tipuri incompatibile");
                     }
                     types_arr_size = 0;
                 }
-#line 1926 "./headers/my_language.tab.c"
+#line 1936 "./headers/my_language.tab.c"
+    break;
+
+  case 68: /* local_statement: ID '[' ID ']' ASSIGN exp ';'  */
+#line 443 "my_language.y"
+                                               {
+                    strcpy(scope, "main");
+                    if (strstr(search_var((yyvsp[-4].str_value), scope), "int") == NULL) {
+                        yyerror("Index gresit");
+                    } 
+                    if (strstr(search_var((yyvsp[-4].str_value), scope), "int") && *((int*)get_value((yyvsp[-4].str_value), "int", scope, variables_table, vars_size)) < 0) {
+                        yyerror("Index gresit");
+                    }
+                    if (strstr(search_var((yyvsp[-6].str_value), scope), types_arr[0]) == NULL) {
+                        yyerror("Tipuri incompatibile");
+                    }
+                    types_arr_size = 0;
+                }
+#line 1954 "./headers/my_language.tab.c"
     break;
 
   case 78: /* init: TIP ID ASSIGN exp  */
-#line 438 "my_language.y"
+#line 467 "my_language.y"
                          {
         if (strcmp(types_arr[0], (yyvsp[-3].str_value)) == 0) {
             var_name[0] = '\0'; 
@@ -1939,23 +1967,23 @@ yyreduce:
         }
         types_arr_size = 0;
      }
-#line 1943 "./headers/my_language.tab.c"
+#line 1971 "./headers/my_language.tab.c"
     break;
 
   case 82: /* increment: ID ASSIGN exp  */
-#line 456 "my_language.y"
+#line 485 "my_language.y"
                           {types_arr_size = 0;}
-#line 1949 "./headers/my_language.tab.c"
+#line 1977 "./headers/my_language.tab.c"
     break;
 
   case 88: /* param: exp  */
-#line 466 "my_language.y"
+#line 495 "my_language.y"
             {types_arr_size = 0;}
-#line 1955 "./headers/my_language.tab.c"
+#line 1983 "./headers/my_language.tab.c"
     break;
 
   case 89: /* exp: aexp  */
-#line 469 "my_language.y"
+#line 498 "my_language.y"
            {
         if (strcmp(types_arr[0], "int") == 0) {
             printf("S-a recunoscut valoarea numerica %d.\n", *((int*)(yyvsp[0].address)));
@@ -1971,48 +1999,50 @@ yyreduce:
         }
         (yyval.address) = result;
     }
-#line 1975 "./headers/my_language.tab.c"
+#line 2003 "./headers/my_language.tab.c"
     break;
 
   case 90: /* exp: bexp  */
-#line 484 "my_language.y"
+#line 513 "my_language.y"
            {
         printf("S-a recunoscut valoarea booleana: %s.\n", (yyvsp[0].boolean_value) ? "true" : "false");
         boolean = (yyvsp[0].boolean_value); 
         result = (void*)(malloc(sizeof(bool))); 
         memcpy(result, &boolean, sizeof(bool)); 
+        strcpy(types_arr[0], "bool");
         (yyval.address) = result;    
     }
-#line 1987 "./headers/my_language.tab.c"
+#line 2016 "./headers/my_language.tab.c"
     break;
 
   case 91: /* exp: str  */
-#line 491 "my_language.y"
+#line 521 "my_language.y"
           {
         printf("S-a recunoscut sirul %s.\n", (yyvsp[0].str_value));
         string = strdup((yyvsp[0].str_value)); 
         result = (void*)(malloc(strlen(string) + 1)); 
         memcpy(result, string, strlen(string));
+        strcpy(types_arr[0], "string");
         (yyval.address) = result;
     }
-#line 1999 "./headers/my_language.tab.c"
+#line 2029 "./headers/my_language.tab.c"
     break;
 
   case 92: /* exp: CHAR  */
-#line 498 "my_language.y"
+#line 529 "my_language.y"
            {
-        strcpy(types_arr[0], "char");
         printf("S-a recunoscut caracterul %c.\n", (yyvsp[0].char_value));
         character = (yyvsp[0].char_value); 
         result = (void*)(malloc(sizeof(char))); 
         memcpy(result, &character, sizeof(char));
+        strcpy(types_arr[0], "char");
         (yyval.address) = result;
     }
-#line 2012 "./headers/my_language.tab.c"
+#line 2042 "./headers/my_language.tab.c"
     break;
 
   case 93: /* aexp: aexp '+' aexp  */
-#line 508 "my_language.y"
+#line 539 "my_language.y"
                      {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2035,11 +2065,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2039 "./headers/my_language.tab.c"
+#line 2069 "./headers/my_language.tab.c"
     break;
 
   case 94: /* aexp: '(' aexp '+' aexp ')'  */
-#line 530 "my_language.y"
+#line 561 "my_language.y"
                             {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2062,11 +2092,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2066 "./headers/my_language.tab.c"
+#line 2096 "./headers/my_language.tab.c"
     break;
 
   case 95: /* aexp: aexp '-' aexp  */
-#line 552 "my_language.y"
+#line 583 "my_language.y"
                     {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2089,11 +2119,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2093 "./headers/my_language.tab.c"
+#line 2123 "./headers/my_language.tab.c"
     break;
 
   case 96: /* aexp: '(' aexp '-' aexp ')'  */
-#line 574 "my_language.y"
+#line 605 "my_language.y"
                             {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2116,11 +2146,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2120 "./headers/my_language.tab.c"
+#line 2150 "./headers/my_language.tab.c"
     break;
 
   case 97: /* aexp: aexp '*' aexp  */
-#line 596 "my_language.y"
+#line 627 "my_language.y"
                     {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2144,11 +2174,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2148 "./headers/my_language.tab.c"
+#line 2178 "./headers/my_language.tab.c"
     break;
 
   case 98: /* aexp: '(' aexp '*' aexp ')'  */
-#line 619 "my_language.y"
+#line 650 "my_language.y"
                            {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2171,11 +2201,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2175 "./headers/my_language.tab.c"
+#line 2205 "./headers/my_language.tab.c"
     break;
 
   case 99: /* aexp: aexp '/' aexp  */
-#line 641 "my_language.y"
+#line 672 "my_language.y"
                     {
          if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2209,11 +2239,11 @@ yyreduce:
             }
         }
     }
-#line 2213 "./headers/my_language.tab.c"
+#line 2243 "./headers/my_language.tab.c"
     break;
 
   case 100: /* aexp: '(' aexp '/' aexp ')'  */
-#line 674 "my_language.y"
+#line 705 "my_language.y"
                            {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2247,11 +2277,11 @@ yyreduce:
             }
         }
     }
-#line 2251 "./headers/my_language.tab.c"
+#line 2281 "./headers/my_language.tab.c"
     break;
 
   case 101: /* aexp: aexp '%' aexp  */
-#line 707 "my_language.y"
+#line 738 "my_language.y"
                     {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2275,11 +2305,11 @@ yyreduce:
             }
         }
     }
-#line 2279 "./headers/my_language.tab.c"
+#line 2309 "./headers/my_language.tab.c"
     break;
 
   case 102: /* aexp: '(' aexp '%' aexp ')'  */
-#line 730 "my_language.y"
+#line 761 "my_language.y"
                             {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2303,11 +2333,11 @@ yyreduce:
             }
         }
     }
-#line 2307 "./headers/my_language.tab.c"
+#line 2337 "./headers/my_language.tab.c"
     break;
 
   case 103: /* aexp: aexp '^' aexp  */
-#line 753 "my_language.y"
+#line 784 "my_language.y"
                     {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2330,11 +2360,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2334 "./headers/my_language.tab.c"
+#line 2364 "./headers/my_language.tab.c"
     break;
 
   case 104: /* aexp: '(' aexp '^' aexp ')'  */
-#line 775 "my_language.y"
+#line 806 "my_language.y"
                            {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2357,11 +2387,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2361 "./headers/my_language.tab.c"
+#line 2391 "./headers/my_language.tab.c"
     break;
 
   case 105: /* aexp: INTEGER  */
-#line 797 "my_language.y"
+#line 828 "my_language.y"
               {
         strcpy(types_arr[types_arr_size++], "int"); 
         inum = (yyvsp[0].int_value); 
@@ -2369,11 +2399,11 @@ yyreduce:
         memcpy(result, &inum, sizeof(int));
         (yyval.address) = result;
     }
-#line 2373 "./headers/my_language.tab.c"
+#line 2403 "./headers/my_language.tab.c"
     break;
 
   case 106: /* aexp: FLOAT  */
-#line 804 "my_language.y"
+#line 835 "my_language.y"
             {
         strcpy(types_arr[types_arr_size++], "float"); 
         fnum = (yyvsp[0].float_value); 
@@ -2381,11 +2411,11 @@ yyreduce:
         memcpy(result, &fnum, sizeof(float));
         (yyval.address) = result;
     }
-#line 2385 "./headers/my_language.tab.c"
+#line 2415 "./headers/my_language.tab.c"
     break;
 
   case 107: /* aexp: ID  */
-#line 811 "my_language.y"
+#line 842 "my_language.y"
          {
         if (strcmp(search_var((yyvsp[0].str_value), scope), "undefined") == 0) {
             sprintf(msg, "%s %s %s", "Variabila", (yyvsp[0].str_value), "nu este declarata");
@@ -2404,11 +2434,11 @@ yyreduce:
             (yyval.address) = result;
         }
     }
-#line 2408 "./headers/my_language.tab.c"
+#line 2438 "./headers/my_language.tab.c"
     break;
 
   case 108: /* bexp: aexp '<' aexp  */
-#line 831 "my_language.y"
+#line 862 "my_language.y"
                      {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2426,11 +2456,11 @@ yyreduce:
             }
         }
      }
-#line 2430 "./headers/my_language.tab.c"
+#line 2460 "./headers/my_language.tab.c"
     break;
 
   case 109: /* bexp: '(' aexp '<' aexp ')'  */
-#line 848 "my_language.y"
+#line 879 "my_language.y"
                            {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2448,11 +2478,11 @@ yyreduce:
             }
         }
      }
-#line 2452 "./headers/my_language.tab.c"
+#line 2482 "./headers/my_language.tab.c"
     break;
 
   case 110: /* bexp: aexp '>' aexp  */
-#line 865 "my_language.y"
+#line 896 "my_language.y"
                      {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2470,11 +2500,11 @@ yyreduce:
             }
         }
     }
-#line 2474 "./headers/my_language.tab.c"
+#line 2504 "./headers/my_language.tab.c"
     break;
 
   case 111: /* bexp: '(' aexp '>' aexp ')'  */
-#line 882 "my_language.y"
+#line 913 "my_language.y"
                            {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2492,11 +2522,11 @@ yyreduce:
             }
         }
      }
-#line 2496 "./headers/my_language.tab.c"
+#line 2526 "./headers/my_language.tab.c"
     break;
 
   case 112: /* bexp: aexp LTE aexp  */
-#line 899 "my_language.y"
+#line 930 "my_language.y"
                      {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2514,11 +2544,11 @@ yyreduce:
             }
         }
      }
-#line 2518 "./headers/my_language.tab.c"
+#line 2548 "./headers/my_language.tab.c"
     break;
 
   case 113: /* bexp: '(' aexp LTE aexp ')'  */
-#line 916 "my_language.y"
+#line 947 "my_language.y"
                              {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2536,11 +2566,11 @@ yyreduce:
             }
         }
      }
-#line 2540 "./headers/my_language.tab.c"
+#line 2570 "./headers/my_language.tab.c"
     break;
 
   case 114: /* bexp: aexp GTE aexp  */
-#line 933 "my_language.y"
+#line 964 "my_language.y"
                      {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2558,11 +2588,11 @@ yyreduce:
             }
         }
      }
-#line 2562 "./headers/my_language.tab.c"
+#line 2592 "./headers/my_language.tab.c"
     break;
 
   case 115: /* bexp: '(' aexp GTE aexp ')'  */
-#line 950 "my_language.y"
+#line 981 "my_language.y"
                              {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2580,11 +2610,11 @@ yyreduce:
             }
         }
      }
-#line 2584 "./headers/my_language.tab.c"
+#line 2614 "./headers/my_language.tab.c"
     break;
 
   case 116: /* bexp: aexp EQ aexp  */
-#line 967 "my_language.y"
+#line 998 "my_language.y"
                     {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2602,11 +2632,11 @@ yyreduce:
             }
         }
      }
-#line 2606 "./headers/my_language.tab.c"
+#line 2636 "./headers/my_language.tab.c"
     break;
 
   case 117: /* bexp: '(' aexp EQ aexp ')'  */
-#line 984 "my_language.y"
+#line 1015 "my_language.y"
                             {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2624,11 +2654,11 @@ yyreduce:
             }
         }
      }
-#line 2628 "./headers/my_language.tab.c"
+#line 2658 "./headers/my_language.tab.c"
     break;
 
   case 118: /* bexp: aexp NEQ aexp  */
-#line 1001 "my_language.y"
+#line 1032 "my_language.y"
                      {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2646,11 +2676,11 @@ yyreduce:
             }
         }
      }
-#line 2650 "./headers/my_language.tab.c"
+#line 2680 "./headers/my_language.tab.c"
     break;
 
   case 119: /* bexp: '(' aexp NEQ aexp ')'  */
-#line 1018 "my_language.y"
+#line 1049 "my_language.y"
                              {
         if (!checkTypes()) {
             yyerror("Operanzii din expresie nu au acelasi tip");
@@ -2668,84 +2698,81 @@ yyreduce:
             }
         }
      }
-#line 2672 "./headers/my_language.tab.c"
-    break;
-
-  case 120: /* bexp: bexp AND bexp  */
-#line 1035 "my_language.y"
-                     {(yyval.boolean_value) = ((yyvsp[-2].boolean_value) && (yyvsp[0].boolean_value));}
-#line 2678 "./headers/my_language.tab.c"
-    break;
-
-  case 121: /* bexp: '(' bexp AND bexp ')'  */
-#line 1036 "my_language.y"
-                             {(yyval.boolean_value) = ((yyvsp[-3].boolean_value) && (yyvsp[-1].boolean_value));}
-#line 2684 "./headers/my_language.tab.c"
-    break;
-
-  case 122: /* bexp: bexp OR bexp  */
-#line 1037 "my_language.y"
-                    {(yyval.boolean_value) = ((yyvsp[-2].boolean_value) || (yyvsp[0].boolean_value));}
-#line 2690 "./headers/my_language.tab.c"
-    break;
-
-  case 123: /* bexp: '(' bexp OR bexp ')'  */
-#line 1038 "my_language.y"
-                            {(yyval.boolean_value) = ((yyvsp[-3].boolean_value) || (yyvsp[-1].boolean_value));}
-#line 2696 "./headers/my_language.tab.c"
-    break;
-
-  case 124: /* bexp: bexp EQ bexp  */
-#line 1039 "my_language.y"
-                    {(yyval.boolean_value) = ((yyvsp[-2].boolean_value) == (yyvsp[0].boolean_value));}
 #line 2702 "./headers/my_language.tab.c"
     break;
 
-  case 125: /* bexp: '(' bexp EQ bexp ')'  */
-#line 1040 "my_language.y"
-                            {(yyval.boolean_value) = ((yyvsp[-3].boolean_value) == (yyvsp[-1].boolean_value));}
+  case 120: /* bexp: bexp AND bexp  */
+#line 1066 "my_language.y"
+                     {(yyval.boolean_value) = ((yyvsp[-2].boolean_value) && (yyvsp[0].boolean_value));}
 #line 2708 "./headers/my_language.tab.c"
     break;
 
-  case 126: /* bexp: bexp NEQ bexp  */
-#line 1041 "my_language.y"
-                     {(yyval.boolean_value) = ((yyvsp[-2].boolean_value) != (yyvsp[0].boolean_value));}
+  case 121: /* bexp: '(' bexp AND bexp ')'  */
+#line 1067 "my_language.y"
+                             {(yyval.boolean_value) = ((yyvsp[-3].boolean_value) && (yyvsp[-1].boolean_value));}
 #line 2714 "./headers/my_language.tab.c"
     break;
 
-  case 127: /* bexp: '(' bexp NEQ bexp ')'  */
-#line 1042 "my_language.y"
-                             {(yyval.boolean_value) = ((yyvsp[-3].boolean_value) != (yyvsp[-1].boolean_value));}
+  case 122: /* bexp: bexp OR bexp  */
+#line 1068 "my_language.y"
+                    {(yyval.boolean_value) = ((yyvsp[-2].boolean_value) || (yyvsp[0].boolean_value));}
 #line 2720 "./headers/my_language.tab.c"
     break;
 
-  case 128: /* bexp: '!' bexp  */
-#line 1043 "my_language.y"
-                {(yyval.boolean_value) = (!(yyvsp[0].boolean_value));}
+  case 123: /* bexp: '(' bexp OR bexp ')'  */
+#line 1069 "my_language.y"
+                            {(yyval.boolean_value) = ((yyvsp[-3].boolean_value) || (yyvsp[-1].boolean_value));}
 #line 2726 "./headers/my_language.tab.c"
     break;
 
+  case 124: /* bexp: bexp EQ bexp  */
+#line 1070 "my_language.y"
+                    {(yyval.boolean_value) = ((yyvsp[-2].boolean_value) == (yyvsp[0].boolean_value));}
+#line 2732 "./headers/my_language.tab.c"
+    break;
+
+  case 125: /* bexp: '(' bexp EQ bexp ')'  */
+#line 1071 "my_language.y"
+                            {(yyval.boolean_value) = ((yyvsp[-3].boolean_value) == (yyvsp[-1].boolean_value));}
+#line 2738 "./headers/my_language.tab.c"
+    break;
+
+  case 126: /* bexp: bexp NEQ bexp  */
+#line 1072 "my_language.y"
+                     {(yyval.boolean_value) = ((yyvsp[-2].boolean_value) != (yyvsp[0].boolean_value));}
+#line 2744 "./headers/my_language.tab.c"
+    break;
+
+  case 127: /* bexp: '(' bexp NEQ bexp ')'  */
+#line 1073 "my_language.y"
+                             {(yyval.boolean_value) = ((yyvsp[-3].boolean_value) != (yyvsp[-1].boolean_value));}
+#line 2750 "./headers/my_language.tab.c"
+    break;
+
+  case 128: /* bexp: '!' bexp  */
+#line 1074 "my_language.y"
+                {(yyval.boolean_value) = (!(yyvsp[0].boolean_value));}
+#line 2756 "./headers/my_language.tab.c"
+    break;
+
   case 129: /* bexp: BOOLEAN  */
-#line 1044 "my_language.y"
-               {
-        strcpy(types_arr[0], "bool");
-        (yyval.boolean_value) = (yyvsp[0].boolean_value);
-    }
-#line 2735 "./headers/my_language.tab.c"
+#line 1075 "my_language.y"
+               {(yyval.boolean_value) = (yyvsp[0].boolean_value);}
+#line 2762 "./headers/my_language.tab.c"
     break;
 
   case 130: /* str: str '+' str  */
-#line 1050 "my_language.y"
+#line 1078 "my_language.y"
                   {
         char *s = strdup((yyvsp[-2].str_value)); 
         strcat(s, (yyvsp[0].str_value)); 
         (yyval.str_value) = s;        
     }
-#line 2745 "./headers/my_language.tab.c"
+#line 2772 "./headers/my_language.tab.c"
     break;
 
   case 131: /* str: str '^' aexp  */
-#line 1055 "my_language.y"
+#line 1083 "my_language.y"
                    {
         if (strcmp(types_arr[0], "int") == 0) {
             inum = *((int*)(yyvsp[0].address));
@@ -2764,11 +2791,11 @@ yyreduce:
         }
 
     }
-#line 2768 "./headers/my_language.tab.c"
+#line 2795 "./headers/my_language.tab.c"
     break;
 
   case 132: /* str: str '%' str  */
-#line 1073 "my_language.y"
+#line 1101 "my_language.y"
                   {
         char* aux = strdup("");
         char* aux2 = strdup((yyvsp[-2].str_value));
@@ -2782,20 +2809,17 @@ yyreduce:
         strcat(aux, "\0");
         (yyval.str_value) = aux;
     }
-#line 2786 "./headers/my_language.tab.c"
+#line 2813 "./headers/my_language.tab.c"
     break;
 
   case 133: /* str: STRING  */
-#line 1086 "my_language.y"
-              {
-        strcpy(types_arr[0], "string");
-        (yyval.str_value) = strdup((yyvsp[0].str_value));
-    }
-#line 2795 "./headers/my_language.tab.c"
+#line 1114 "my_language.y"
+              {(yyval.str_value) = strdup((yyvsp[0].str_value));}
+#line 2819 "./headers/my_language.tab.c"
     break;
 
 
-#line 2799 "./headers/my_language.tab.c"
+#line 2823 "./headers/my_language.tab.c"
 
       default: break;
     }
@@ -2988,7 +3012,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 1091 "my_language.y"
+#line 1116 "my_language.y"
 
 
 int main(int argc, char** argv) {

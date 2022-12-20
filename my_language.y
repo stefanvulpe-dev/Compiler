@@ -56,7 +56,8 @@ int tmp_size = 0;
 %%
 global_variables : global_declaration ';' global_variables 
                  | functions
-
+                 ;
+                
 global_declaration : CONST TIP ID ASSIGN exp {
                         types_arr_size = 0;
                         if (strcmp(types_arr[0], $2) == 0) {
@@ -301,8 +302,27 @@ function_statement : TIP ID ASSIGN exp ';' {
                         }
                         types_arr_size = 0;
                     }
-                    | ID '[' INTEGER ']' ASSIGN exp ';' {types_arr_size = 0;}
-                    | ID '[' ID ']' ASSIGN exp ';' {types_arr_size = 0;}
+                    | ID '[' INTEGER ']' ASSIGN exp ';' {
+                        if ($3 < 0) {
+                            yyerror("Index negativ");
+                        }
+                        if (strstr(search_var($1, scope), types_arr[0]) == NULL) {
+                            yyerror("Tipuri incompatibile");
+                        }
+                        types_arr_size = 0;
+                    }
+                    | ID '[' ID ']' ASSIGN exp ';' {
+                        if (strstr(search_var($3, scope), "int") == NULL) {
+                            yyerror("Index gresit");
+                        } 
+                        if (strstr(search_var($3, scope), "int") && *((int*)get_value($3, "int", scope, variables_table, vars_size)) < 0) {
+                            yyerror("Index gresit");
+                        } 
+                        if (strstr(search_var($1, scope), types_arr[0]) == NULL) {
+                            yyerror("Tipuri incompatibile");
+                        }
+                        types_arr_size = 0;
+                    }
                     | ID '(' ')' ';'
                     | ID '(' params ')' ';'
                     | ID '-' '>' ID ';'
@@ -415,12 +435,21 @@ local_statement : TIP ID ASSIGN exp ';' {
                     if ($3 < 0) {
                         yyerror("Index negativ al array-ului");
                     }
+                    if (strstr(search_var($1, scope), types_arr[0]) == NULL) {
+                        yyerror("Tipuri incompatibile");
+                    }
                     types_arr_size = 0;
                 }
                 | ID '[' ID ']' ASSIGN exp ';' {
                     strcpy(scope, "main");
-                    if (get_value($3, search_var($3, scope), scope, variables_table, vars_size) == NULL) {
+                    if (strstr(search_var($3, scope), "int") == NULL) {
                         yyerror("Index gresit");
+                    } 
+                    if (strstr(search_var($3, scope), "int") && *((int*)get_value($3, "int", scope, variables_table, vars_size)) < 0) {
+                        yyerror("Index gresit");
+                    }
+                    if (strstr(search_var($1, scope), types_arr[0]) == NULL) {
+                        yyerror("Tipuri incompatibile");
                     }
                     types_arr_size = 0;
                 }
@@ -486,6 +515,7 @@ exp : aexp {
         boolean = $1; 
         result = (void*)(malloc(sizeof(bool))); 
         memcpy(result, &boolean, sizeof(bool)); 
+        strcpy(types_arr[0], "bool");
         $$ = result;    
     }
     | str {
@@ -493,14 +523,15 @@ exp : aexp {
         string = strdup($1); 
         result = (void*)(malloc(strlen(string) + 1)); 
         memcpy(result, string, strlen(string));
+        strcpy(types_arr[0], "string");
         $$ = result;
     }
     | CHAR {
-        strcpy(types_arr[0], "char");
         printf("S-a recunoscut caracterul %c.\n", $1);
         character = $1; 
         result = (void*)(malloc(sizeof(char))); 
         memcpy(result, &character, sizeof(char));
+        strcpy(types_arr[0], "char");
         $$ = result;
     }
     ;
@@ -1041,10 +1072,7 @@ bexp : aexp '<' aexp {
      | bexp NEQ bexp {$$ = ($1 != $3);}
      | '(' bexp NEQ bexp ')' {$$ = ($2 != $4);}
      | '!' bexp {$$ = (!$2);}
-     | BOOLEAN {
-        strcpy(types_arr[0], "bool");
-        $$ = $1;
-    }
+     | BOOLEAN {$$ = $1;}
      ;
 
 str : str '+' str {
@@ -1083,10 +1111,7 @@ str : str '+' str {
         strcat(aux, "\0");
         $$ = aux;
     }
-    | STRING  {
-        strcpy(types_arr[0], "string");
-        $$ = strdup($1);
-    }
+    | STRING  {$$ = strdup($1);}
     ;
 %%
 
