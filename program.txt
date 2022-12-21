@@ -26,6 +26,10 @@ int cmmdc(int a, int b) {
     }
 }
 
+int ff(char x) {
+    
+}
+
 float compute_volume(float base, float height) {
     float estimated_volume ::= 1000.0;
     float a ::= 0.0; 
