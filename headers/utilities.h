@@ -35,6 +35,7 @@ char* search_var(char* name, char* scope) {
             return variables_table[i].type;
         }
     }
+
     for (int i = 0; i < vars_size; ++i) {
         if (strcmp(variables_table[i].name, name) == 0 && strcmp(variables_table[i].scope, "global") == 0) {
             return variables_table[i].type;
@@ -44,7 +45,6 @@ char* search_var(char* name, char* scope) {
     char msg[100];
     sprintf(msg, "%s %s %s", "Variabila", name, "nu exista");
     yyerror(msg);
-    return "undefined";
 }
 
 void* get_value(char* name, char* type, char* scope, struct symbol_table table[], int table_size) {
@@ -138,6 +138,17 @@ int insertFunction(char* returned_type, char* name, char* parameters) {
     functions_size ++;
 }
 
+char* search_function(char* name, char* parameters) {
+    for (int i = 0; i < functions_size; ++i) {
+        if ((strcmp(functions_table[i].name, name) == 0 && strcmp(functions_table[i].parameters, parameters) == 0)) {
+            return functions_table[i].returned_type;
+        }
+    }
+    char msg[50]; 
+    sprintf(msg, "%s %s(%s) %s", "Functia", name, parameters, "nu exista sau nu a fost apelata corect");
+    yyerror(msg);
+}
+
 void print_functions_table(FILE* fptr) {
     fprintf(fptr, "Name  --->   < returned-type >   { parameters }\n");
     fprintf(fptr, "----------------------------------------------------------------------------------\n");
@@ -180,4 +191,152 @@ char *strrev(char *str) {
 void yyerror(char * s) {
     printf("eroare: %s, la linia %d.\n", s, yylineno);
     exit(0);
+}
+
+typedef enum {
+    AST_PLUS,
+    AST_MULTIPLY,
+    AST_DIVIDE,
+    AST_MINUS,
+    AST_INTEGER, 
+    AST_VAR
+} AstType;
+
+typedef struct AstNode {
+    AstType type;
+    int value;
+    struct AstNode* left;
+    struct AstNode* right;
+} AstNode;
+
+AstNode* new_ast_node(AstType type, int value, AstNode* left, AstNode* right) {
+    AstNode *node = (AstNode *)malloc(sizeof(AstNode));
+    node->type = type;
+    node->value = value;
+    node->left = left;
+    node->right = right;
+    return node;
+}
+
+int eval_ast(AstNode *node) {
+    if (node->type == AST_INTEGER || node->type == AST_VAR) {
+        return node->value;
+    }
+    else if (node->type == AST_PLUS) {
+        return eval_ast(node->left) + eval_ast(node->right);
+    }
+    else if (node->type == AST_MINUS) {
+        return eval_ast(node->left) - eval_ast(node->right);
+    }
+    else if (node->type == AST_MULTIPLY) {
+        return eval_ast(node->left) * eval_ast(node->right);
+    }
+    else if(node->type == AST_DIVIDE) {
+        int b = eval_ast(node->right);
+        if (b != 0) {
+            return eval_ast(node->left) / b;
+        }
+        else {
+            printf("Eroare, impartire la 0.\n"); 
+            return -1;
+        }
+    }
+    return 0;
+}
+
+void free_ast(AstNode* root) {
+    if (root != NULL) {
+        free_ast(root->left); 
+        free_ast(root->right);
+        free(root);
+    }
+}
+
+typedef enum value_type {
+    PCHAR, 
+    PINT, 
+    PFLOAT, 
+    PLUS,
+    MINUS,
+    DIVIDE, 
+    MULTIPLY
+} ValueType;
+
+typedef struct TypeNode {
+    ValueType type; 
+    struct TypeNode* left; 
+    struct TypeNode* right;
+} TypeNode; 
+
+TypeNode* new_node(ValueType type, TypeNode* left, TypeNode* right) {
+    TypeNode* node = (TypeNode*)malloc(sizeof(TypeNode)); 
+    node->type = type; 
+    node->left = left; 
+    node->right = right; 
+    return node;
+}
+
+ValueType TypeOf(TypeNode* root) {
+    if (root->type == PINT || root->type == PCHAR || root->type == PFLOAT) {
+        return root->type;
+    }
+    else if (root->type == PLUS) {
+        ValueType t1 = TypeOf(root->left); 
+        ValueType t2 = TypeOf(root->right);
+
+        if (t1 != t2) {
+            printf("Tipuri de date incompatibile.\n");
+            exit(0);
+        } 
+
+        return t1;
+    }
+    else if (root->type == MINUS) {
+        ValueType t1 = TypeOf(root->left); 
+        ValueType t2 = TypeOf(root->right);
+
+        if (t1 != t2) {
+            printf("Tipuri de date incompatibile.\n");
+            exit(0);
+        } 
+
+        return t1;
+    }
+    else if (root->type == MULTIPLY) {
+        ValueType t1 = TypeOf(root->left); 
+        ValueType t2 = TypeOf(root->right);
+
+        if (t1 != t2) {
+            printf("Tipuri de date incompatibile.\n");
+            exit(0);
+        } 
+
+        return t1;
+    }
+    else if (root->type == DIVIDE) {
+        ValueType t1 = TypeOf(root->left); 
+        ValueType t2 = TypeOf(root->right);
+
+        if (t1 != t2) {
+            printf("Tipuri de date incompatibile.\n");
+            exit(0);
+        } 
+
+        return t1;
+    }
+    return 0;
+}
+
+void print_type(ValueType val) {
+    switch (val) {
+        case PINT:
+            printf("int.\n");
+        break;
+        case PCHAR: 
+            printf("char.\n");
+        break;
+        case PFLOAT: 
+            printf("float.\n");
+        break;
+    }
 }

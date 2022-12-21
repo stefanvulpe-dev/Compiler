@@ -66,6 +66,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                             strcat(var_name, $3); 
                             sprintf(var_type, "%s %s", $1, $2);
                             insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                            var_type[0] = '\0';
                         }
                         else {
                             yyerror("Tipuri de date incompatibile");
@@ -79,6 +80,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                             strcat(var_name, $2); 
                             sprintf(var_type, "%s", $1);
                             insertVar(variables_table, &vars_size, var_name, var_type, scope, $4);
+                            var_type[0] = '\0';
                         }
                         else {
                             yyerror("Tipuri de date incompatibile");
@@ -92,6 +94,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                             strcat(var_name, $3); 
                             sprintf(var_type, "%s %s[]", $1, $2);
                             insertVar(variables_table, &vars_size, var_name, var_type, scope, $7);
+                            var_type[0] = '\0';
                         }
                         else {
                             yyerror("Tipul elementelor din lista de initializare este diferit de tipul array-ului");
@@ -105,6 +108,7 @@ global_declaration : CONST TIP ID ASSIGN exp {
                             strcat(var_name, $2); 
                             sprintf(var_type, "%s[]", $1);
                             insertVar(variables_table, &vars_size, var_name, var_type, scope, $6);
+                            var_type[0] = '\0';
                         }
                         else {
                             yyerror("Tipul elementelor din lista de initializare este diferit de tipul array-ului");
@@ -290,6 +294,7 @@ function_statement : TIP ID ASSIGN exp ';' {
                             strcpy(var_name, $3);
                             sprintf(var_type, "%s %s", $1, $2);
                             insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                            var_type[0] = '\0';
                         }
                         else {
                             yyerror("Tipuri de date incompatibile");
@@ -323,8 +328,13 @@ function_statement : TIP ID ASSIGN exp ';' {
                         }
                         types_arr_size = 0;
                     }
-                    | ID '(' ')' ';'
-                    | ID '(' params ')' ';'
+                    | ID '(' ')' ';' {
+                        search_function($1, "");
+                    }
+                    | ID '(' params ')' ';' {
+                        search_function($1, strrev(var_type)); 
+                        var_type[0] = '\0';
+                    }
                     | ID '-' '>' ID ';'
                     | ID '-' '>' ID '(' ')' ';'
                     | ID '-' '>' ID '(' param ')' ';'
@@ -356,6 +366,7 @@ class_declaration : CONST TIP ID ASSIGN exp {
                         else {
                             yyerror("Tipuri de date incompatibile");
                         }
+                        var_type[0] = '\0';
                         types_arr_size = 0;
                   }
                   | TIP ID ASSIGN exp {
@@ -368,6 +379,7 @@ class_declaration : CONST TIP ID ASSIGN exp {
                         else {
                             yyerror("Tipuri de date incompatibile");
                         }
+                        var_type[0] = '\0';
                         types_arr_size = 0;
                   }
                   | TIP ID {
@@ -377,20 +389,23 @@ class_declaration : CONST TIP ID ASSIGN exp {
                         result = malloc(sizeof(int)); 
                         *((int*)result) = 0;
                         insertVar(tmp_vars, &tmp_size, var_name, var_type, "", result);
+                        var_type[0] = '\0';
                   }
-                  | TIP ID '(' ')'
-                  | TIP ID '(' param_list ')'
+                  | TIP ID '(' ')' 
+                  | TIP ID '(' param_list ')' {var_type[0] = '\0';}
                   | CONST TIP ID brackets {
                         var_name[0] = '\0';
                         strcat(var_name, $3); 
                         sprintf(var_type, "%s %s[]", $1, $2);
                         insertVar(tmp_vars, &tmp_size, var_name, var_type, "", "");
+                        var_type[0] = '\0';
                   }
                   | TIP ID brackets {
                         var_name[0] = '\0';
                         strcat(var_name, $2); 
                         sprintf(var_type, "%s[]", $1);
                         insertVar(tmp_vars, &tmp_size, var_name, var_type, "", "");
+                        var_type[0] = '\0';
                   }
                   ;
 
@@ -419,6 +434,7 @@ local_statement : TIP ID ASSIGN exp ';' {
                         strcpy(var_name, $3);
                         sprintf(var_type, "%s %s", $1, $2);
                         insertVar(variables_table, &vars_size, var_name, var_type, scope, $5);
+                        var_type[0] = '\0';
                     }
                     else {
                         yyerror("Tipuri de date incompatibile");
@@ -453,11 +469,16 @@ local_statement : TIP ID ASSIGN exp ';' {
                     }
                     types_arr_size = 0;
                 }
-                | ID '(' ')' ';'
-                | ID '(' params ')' ';'
+                | ID '(' ')' ';' {
+                    search_function($1, "");
+                }
+                | ID '(' params ')' ';' {
+                    search_function($1, strrev(var_type));
+                    var_type[0] = '\0';
+                }
                 | ID '-' '>' ID ';'
                 | ID '-' '>' ID '(' ')' ';'
-                | ID '-' '>' ID '(' param ')' ';'
+                | ID '-' '>' ID '(' params ')' ';'
                 | IF '(' bexp ')' '{' local_statements '}' 
                 | IF '(' bexp ')' '{' local_statements '}' ELSE '{' local_statements '}'
                 | WHILE_LOOP '(' bexp ')' '{' local_statements '}' 
@@ -470,6 +491,7 @@ init : TIP ID ASSIGN exp {
             strcpy(var_name, $2);
             sprintf(var_type, "%s", $1);
             insertVar(variables_table, &vars_size, var_name, var_type, "main", $4);
+            var_type[0] ='\0';
         }
         else {
             yyerror("Tipuri de date incompatibile");
@@ -490,9 +512,38 @@ params : param ',' params
        | param 
        ;
 
-param : ID '(' ')'
-      | ID '(' params ')'
-      | exp {types_arr_size = 0;}
+param : ID '(' ')' {
+        strcat(var_type, search_function($1, ""));
+        strcat(var_type, " ");
+      }
+      | ID '[' INTEGER ']' {
+        if ($3 > 0) {
+            strncpy(msg, search_var($1, scope), strlen(search_var($1, scope)) - 2);
+            strcat(msg, "\0");
+            strcat(var_type, msg);
+            strcat(var_type, " ");
+        }
+        else {
+            yyerror("Index negativ");
+        }
+      }
+      | ID '[' ID ']' {
+         if (strstr(search_var($3, scope), "int") == NULL) {
+            yyerror("Index gresit");
+        } 
+        if (strstr(search_var($3, scope), "int") && *((int*)get_value($3, "int", scope, variables_table, vars_size)) < 0) {
+            yyerror("Index negativ");
+        }
+        strncpy(msg, search_var($1, scope), strlen(search_var($1, scope)) - 2);
+        strcat(msg, "\0");
+        strcat(var_type, msg);
+        strcat(var_type, " ");
+      }
+      | exp {
+        strcat(var_type, types_arr[0]); 
+        strcat(var_type, " ");
+        types_arr_size = 0;
+      }
       ;
 
 exp : aexp {
@@ -1129,4 +1180,39 @@ int main(int argc, char** argv) {
     fclose(fptr_vars);
 
     fclose(fptr_fct);
+
+    int x, y, z;
+
+    printf("Enter the value for x: "); 
+    scanf("%d", &x);
+    printf("Enter the value for y: "); 
+    scanf("%d", &y);
+    printf("Enter the value for z: "); 
+    scanf("%d", &z);
+
+    AstNode* node1 = new_ast_node(AST_VAR, x, NULL, NULL); 
+    AstNode* node2 = new_ast_node(AST_INTEGER, 5, NULL, NULL);
+    AstNode* node3 = new_ast_node(AST_VAR, y, NULL, NULL);
+    AstNode* node4 = new_ast_node(AST_VAR, z, NULL, NULL);
+    AstNode* node5 = new_ast_node(AST_MULTIPLY, 0, node2, node3);
+    AstNode* node6 = new_ast_node(AST_PLUS, 0, node1, node5);
+    AstNode* root = new_ast_node(AST_DIVIDE, 0, node6, node4);
+
+    /* (x + 5 * y) / z */
+
+    int result = eval_ast(root);
+    printf("Rezultat evaluare AST: %d\n", result);  
+    
+    free_ast(root);
+
+    TypeNode* a = new_node(PINT, NULL, NULL);
+    TypeNode* b = new_node(PINT, NULL, NULL);
+    TypeNode* c = new_node(PINT, NULL, NULL);
+    TypeNode* plus = new_node(PLUS, a, b); 
+    TypeNode* type = new_node(MULTIPLY, c, plus);
+
+    ValueType result_type = TypeOf(type);
+    print_type(result_type);
+
+    return 0;
 } 
