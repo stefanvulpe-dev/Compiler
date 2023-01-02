@@ -3138,6 +3138,8 @@ int main(int argc, char** argv) {
     printf("Enter the value for z: "); 
     scanf("%d", &z);
 
+    /* (x + 5 * y) / z */
+
     AstNode* node1 = new_ast_node(AST_VAR, x, NULL, NULL); 
     AstNode* node2 = new_ast_node(AST_INTEGER, 5, NULL, NULL);
     AstNode* node3 = new_ast_node(AST_VAR, y, NULL, NULL);
@@ -3146,15 +3148,13 @@ int main(int argc, char** argv) {
     AstNode* node6 = new_ast_node(AST_PLUS, 0, node1, node5);
     AstNode* root = new_ast_node(AST_DIVIDE, 0, node6, node4);
 
-    /* (x + 5 * y) / z */
-
     int result = eval_ast(root);
     printf("Rezultat evaluare AST: %d\n", result);  
     
     free_ast(root);
 
     TypeNode* a = new_node(PINT, NULL, NULL);
-    TypeNode* b = new_node(PCHAR, NULL, NULL);
+    TypeNode* b = new_node(PINT, NULL, NULL);
     TypeNode* c = new_node(PINT, NULL, NULL);
     TypeNode* plus = new_node(PLUS, a, b); 
     TypeNode* type = new_node(MULTIPLY, c, plus);
